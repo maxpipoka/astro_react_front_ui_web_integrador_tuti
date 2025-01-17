@@ -1,0 +1,30 @@
+---
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} - Attendance System</title>
+  </head>
+  <body class="bg-custom-background">
+    <div class="min-h-screen">
+      <Header client:load />
+      <div class="flex">
+        <Sidebar client:load />
+        <main class="flex-1 p-8">
+          <slot />
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

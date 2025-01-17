@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import StudentAttendanceList from '../../components/StudentAttendanceList';
+---
+
+<DashboardLayout title="Registrar Asistencia">
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold text-custom-text">Registrar Asistencia</h2>
+      <p class="text-custom-text mt-2">Marque la asistencia de los alumnos</p>
+    </div>
+    <StudentAttendanceList client:load />
+  </div>
+</DashboardLayout>
