@@ -11,7 +11,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
         <div className="flex items-center">
           <img src="/logo.svg" alt="School Logo" className="h-10 w-10 mr-3" />
-          <h1 className="text-2xl font-bold text-custom-text">Attendance System</h1>
+          <h1 className="text-2xl font-bold text-custom-text">Registro de Asistencia</h1>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-custom-text">{currentDate}</span>
