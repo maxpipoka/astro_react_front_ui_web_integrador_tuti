@@ -1,6 +1,23 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import StudentAttendanceList from '../../components/StudentAttendanceList';
+import { mockData } from '../../services/api';
+
+export async function getStaticPaths() {
+  // In production, fetch courses from API:
+  // const response = await fetch('http://your-api/courses');
+  // const courses = await response.json();
+  
+  // For development, using mock data:
+  const courses = mockData.courses;
+
+  return courses.map(course => ({
+    params: { id: course.id.toString() },
+    props: { course },
+  }));
+}
+
+const { course } = Astro.props;
 ---
 
 <DashboardLayout title="Registrar Asistencia">
