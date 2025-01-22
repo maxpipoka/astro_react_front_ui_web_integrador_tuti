@@ -19,6 +19,19 @@ export const login = async (username: string, password: string) => {
   }
 };
 
+export const getCoursesByPreceptor = async (preceptorId: number, token: string) => {
+  try {
+    const response = await api.get(`/cursos/preceptor/${preceptorId}`,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export const mockData = {
   // ... rest of the mock data
 };

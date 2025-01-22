@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { getCourses, mockData } from '../services/api';
+import { getCoursesByPreceptor } from '../services/api';
 import CourseCard from './CourseCard';
+import { useAuth } from '../hooks/useAuth';
 
 interface Course {
   id: number;
@@ -9,29 +10,59 @@ interface Course {
   year: number;
 }
 
+interface AuthData {
+  token: string | null;
+  username: string | null;
+  userId: number | null;
+  accessLevel: number | null;
+}
+
 const CourseList = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [authData, setAuthData] = useState<AuthData | null>(null);
+  const auth = typeof window !== 'undefined' ? useAuth() : null;
+
+  useEffect(() => {
+    if (auth){
+      setAuthData({
+        token: auth.token,
+        username: auth.username,
+        userId: auth.userId,
+        accessLevel: auth.accessLevel
+      });
+    }
+  }, [auth]);
+
+  if (!authData) {
+    return null;
+  }
 
   useEffect(() => {
     const fetchCourses = async () => {
+      if (!authData || !authData.token || !authData.userId) {
+        setError('No se pudo obtener la informacion de autenticación')
+        setLoading(false);
+        return
+      }
+
       try {
         // In production, use this:
-        // const response = await getCourses();
-        // setCourses(response.data);
+        const response = await getCoursesByPreceptor(authData.userId, authData.token);
+        setCourses(response.data);
         
         // For development, using mock data:
-        setCourses(mockData.courses);
+        // setCourses(mockData.courses);
         setLoading(false);
       } catch (err) {
-        setError('Error al cargar los cursos');
+        setError('Error al obtener la lista de los cursos');
         setLoading(false);
       }
     };
 
     fetchCourses();
-  }, []);
+  }, [authData]);
 
   if (loading) {
     return (
