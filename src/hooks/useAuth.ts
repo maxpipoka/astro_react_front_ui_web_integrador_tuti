@@ -50,4 +50,4 @@ const createStore = () => {
   );
 };
 
-export const useAuth = typeof window !== 'undefined' ? createStore() : null;
+export const useAuth = createStore();

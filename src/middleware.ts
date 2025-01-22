@@ -2,27 +2,28 @@ import { defineMiddleware } from 'astro:middleware';
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
-  
-  // Get auth data from localStorage if available
+
+  // Skip middleware for auth page
+  if (pathname === '/auth') {
+    return next();
+  }
+
+  // For all other routes, check authentication
   let authData = null;
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('auth-storage');
-    if (stored) {
+  const cookies = context.request.headers.get('cookie');
+  if (cookies) {
+    const authCookie = cookies.split(';').find(cookie => cookie.trim().startsWith('auth-storage='));
+    if (authCookie) {
       try {
-        authData = JSON.parse(stored);
+        authData = JSON.parse(decodeURIComponent(authCookie.split('=')[1]));
       } catch (e) {
-        // Invalid stored data
+        console.error('Invalid stored data', e);
       }
     }
   }
 
-  // If we're on the auth page and already logged in, redirect to home
-  if (pathname === '/auth' && authData?.state?.token) {
-    return context.redirect('/');
-  }
-
-  // If we're not on auth page and not logged in, redirect to login
-  if (pathname !== '/auth' && !authData?.state?.token) {
+  // If not logged in, redirect to auth
+  if (!authData?.state?.token) {
     return context.redirect('/auth');
   }
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:5000';
+const API_URL = 'https://flask-api-rest-integrador-tuti.vercel.app/';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -12,9 +12,7 @@ const api = axios.create({
 // Auth services
 export const login = async (username: string, password: string) => {
   try {
-    console.log('entrando al login')
     const response = await api.post('/auth', { username, password });
-    console.log(response)
     return response;
   } catch (error) {
     throw error;

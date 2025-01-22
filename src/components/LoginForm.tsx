@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { login } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 
@@ -6,50 +6,53 @@ const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  
+
   const authStore = typeof window !== 'undefined' ? useAuth : null;
   const loginUser = authStore?.getState().login;
-
-  // Check if already logged in
-  useEffect(() => {
-    const authData = localStorage.getItem('auth-storage');
-    if (authData) {
-      try {
-        const { state } = JSON.parse(authData);
-        if (state.token) {
-          window.location.href = '/';
-        }
-      } catch (e) {
-        // Invalid stored data
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    console.log('Submitting login form with:', { username, password });
+
     try {
       const response = await login(username, password);
-      
+      console.log('Login response:', response);
+
       if (response.data && response.data.token) {
+        console.log('Login successful, token received:', response.data.token);
+
         if (loginUser) {
-          loginUser({ 
+          loginUser({
             token: response.data.token,
             username: response.data.username,
             userId: response.data.user_id,
-            accessLevel: response.data.access_level
+            accessLevel: response.data.access_level,
           });
-          
-          // Force reload to trigger middleware
-          window.location.href = '/';
+
+          // Store token in a cookie
+          document.cookie = `auth-storage=${encodeURIComponent(JSON.stringify({
+            state: {
+              token: response.data.token,
+              username: response.data.username,
+              userId: response.data.user_id,
+              accessLevel: response.data.access_level,
+            }
+          }))}; path=/`;
+
+          console.log('User logged in, redirecting to home page');
+          window.location.replace('/');
         } else {
           setError('Error al inicializar el almacenamiento');
+          console.error('Error al inicializar el almacenamiento');
         }
       } else {
         setError('Respuesta inválida del servidor');
+        console.error('Respuesta inválida del servidor');
       }
     } catch (err) {
+      console.error('Error during login:', err);
       if (err.response && err.response.data) {
         setError(err.response.data.message || 'Error de autenticación');
       } else {
@@ -73,7 +76,7 @@ const LoginForm = () => {
           required
         />
       </div>
-      
+
       <div>
         <label htmlFor="password" className="block text-custom-text font-medium mb-1">
           Contraseña
