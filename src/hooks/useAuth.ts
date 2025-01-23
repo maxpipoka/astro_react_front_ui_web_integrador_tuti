@@ -43,7 +43,7 @@ const createStore = () => {
           }),
       }),
       {
-        name: 'auth-storage',
+        name: 'sie-auth-storage',
         storage: createJSONStorage(() => localStorage),
       }
     )

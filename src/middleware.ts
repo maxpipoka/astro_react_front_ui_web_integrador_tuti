@@ -12,7 +12,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   let authData = null;
   const cookies = context.request.headers.get('cookie');
   if (cookies) {
-    const authCookie = cookies.split(';').find(cookie => cookie.trim().startsWith('auth-storage='));
+    const authCookie = cookies.split(';').find(cookie => cookie.trim().startsWith('sie-auth-storage='));
     if (authCookie) {
       try {
         authData = JSON.parse(decodeURIComponent(authCookie.split('=')[1]));

@@ -28,7 +28,7 @@ const Header = () => {
     if (auth) {
       auth.logout();
       // Remove auth cookie
-      document.cookie = 'auth-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      document.cookie = 'sie-auth-storage=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       // Redirect to login page
       window.location.replace('/auth');
     }

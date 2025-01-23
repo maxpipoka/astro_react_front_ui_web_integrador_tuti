@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { getCoursesByPreceptor } from '../services/api';
-import CourseCard from './CourseCard';
 import { useAuth } from '../hooks/useAuth';
+import CourseCard from './CourseCard';
+import CourseListSkeleton from './skeletons/CourseListSkeleton';
 
 interface Course {
   id: number;
@@ -25,7 +26,7 @@ const CourseList = () => {
   const auth = typeof window !== 'undefined' ? useAuth() : null;
 
   useEffect(() => {
-    if (auth){
+    if (auth) {
       setAuthData({
         token: auth.token,
         username: auth.username,
@@ -35,25 +36,17 @@ const CourseList = () => {
     }
   }, [auth]);
 
-  if (!authData) {
-    return null;
-  }
-
   useEffect(() => {
     const fetchCourses = async () => {
-      if (!authData || !authData.token || !authData.userId) {
-        setError('No se pudo obtener la informacion de autenticación')
+      if (!authData?.token || !authData?.userId) {
+        setError('No se pudo obtener la información de autenticación');
         setLoading(false);
-        return
+        return;
       }
 
       try {
-        // In production, use this:
         const response = await getCoursesByPreceptor(authData.userId, authData.token);
         setCourses(response.data);
-        
-        // For development, using mock data:
-        // setCourses(mockData.courses);
         setLoading(false);
       } catch (err) {
         setError('Error al obtener la lista de los cursos');
@@ -61,14 +54,18 @@ const CourseList = () => {
       }
     };
 
-    fetchCourses();
-  }, [authData]);
+    if (authData) {
+      fetchCourses();
+    }
+  }, [authData?.token, authData?.userId]); // Only re-run if token or userId changes
+
+  if (!authData) {
+    return null;
+  }
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <p className="text-custom-text">Cargando cursos...</p>
-      </div>
+      <CourseListSkeleton />
     );
   }
 
@@ -97,7 +94,6 @@ const CourseList = () => {
           division={course.division}
           year={course.year}
           onClick={() => {
-            // This will be implemented in the next step when we add the attendance form
             window.location.href = `/register-attendance/${course.id}`;
           }}
         />

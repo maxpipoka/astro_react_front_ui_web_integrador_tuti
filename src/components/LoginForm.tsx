@@ -32,14 +32,14 @@ const LoginForm = () => {
           });
 
           // Store token in a cookie
-          document.cookie = `auth-storage=${encodeURIComponent(JSON.stringify({
+          document.cookie = `sie-auth-storage=${encodeURIComponent(JSON.stringify({
             state: {
               token: response.data.token,
               username: response.data.username,
               userId: response.data.user_id,
               accessLevel: response.data.access_level,
             }
-          }))}; path=/`;
+          }))}; path=/; max-age=3600; SameSite=Lax`;
 
           console.log('User logged in, redirecting to home page');
           window.location.replace('/');
