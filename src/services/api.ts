@@ -45,6 +45,26 @@ export const closeAttendance = async (courseId: number, token: string) => {
   }
 }
 
+export const getAttendanceByDayAndCourse = async (courseId: number, date: string, token: string) => {
+  try {
+    const response = await api.post(
+      '/asistencias/revision/',
+      {
+        course_id: courseId,
+        date_to_search: date
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export const mockData = {
   // ... rest of the mock data
 };

@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+import AttendanceReview from '../components/AttendanceReview';
+---
+
+<DashboardLayout title="Revisar Asistencia">
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold text-custom-text">Revisar Asistencia</h2>
+      <p class="text-custom-text mt-2">Seleccione un curso y fecha para revisar la asistencia</p>
+    </div>
+    <AttendanceReview client:load />
+  </div>
+</DashboardLayout>
