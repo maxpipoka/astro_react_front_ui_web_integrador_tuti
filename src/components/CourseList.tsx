@@ -1,6 +1,7 @@
-import React, { useEffect, useState, Suspense, lazy } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getCoursesByPreceptor } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import { useCoursesStore } from '../stores/coursesStore';
 import CourseCard from './CourseCard';
 import CourseListSkeleton from './skeletons/CourseListSkeleton';
 
@@ -9,6 +10,16 @@ interface Course {
   level: number;
   division: string;
   year: number;
+  createdAt: string;
+  updatedAt: string;
+  associated_user: number;
+  students: {
+    id: number;
+    dni: number;
+    names: string;
+    surnames: string;
+    active: boolean;
+  }[];
 }
 
 interface AuthData {
@@ -19,11 +30,11 @@ interface AuthData {
 }
 
 const CourseList = () => {
-  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authData, setAuthData] = useState<AuthData | null>(null);
   const auth = typeof window !== 'undefined' ? useAuth() : null;
+  const { courses, setCourses } = useCoursesStore();
 
   useEffect(() => {
     if (auth) {
@@ -57,7 +68,7 @@ const CourseList = () => {
     if (authData) {
       fetchCourses();
     }
-  }, [authData?.token, authData?.userId]); // Only re-run if token or userId changes
+  }, [authData?.token, authData?.userId, setCourses]);
 
   if (!authData) {
     return null;
@@ -65,7 +76,10 @@ const CourseList = () => {
 
   if (loading) {
     return (
-      <CourseListSkeleton />
+      <div className="text-center py-8">
+        <p className="text-custom-text">Cargando cursos...</p>
+        <CourseListSkeleton />
+      </div>
     );
   }
 

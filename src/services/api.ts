@@ -32,6 +32,19 @@ export const getCoursesByPreceptor = async (preceptorId: number, token: string) 
   }
 }
 
+export const closeAttendance = async (courseId: number, token: string) => {
+  try {
+    const response = await api.post(`/asistencia/cerrar/${courseId}`, null, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export const mockData = {
   // ... rest of the mock data
 };

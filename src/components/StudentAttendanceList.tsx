@@ -1,60 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { getCourseById, registerAttendance, mockData } from '../services/api';
 import AttendanceToggle from './AttendanceToggle';
 import { format } from 'date-fns';
+import { useCoursesStore } from '../stores/coursesStore';
 
-interface Student {
-  id: number;
-  dni: number;
-  names: string;
-  surnames: string;
-  active: boolean;
+interface StudentAttendanceListProps {
+  courseId: number;
 }
 
-interface Course {
-  id: number;
-  level: number;
-  division: string;
-  year: number;
-  students: Student[];
-}
-
-const StudentAttendanceList = () => {
-  const [course, setCourse] = useState<Course | null>(null);
+const StudentAttendanceList = ({ courseId }: StudentAttendanceListProps) => {
+  const { getCourseById } = useCoursesStore();
+  const course = getCourseById(courseId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attendanceStates, setAttendanceStates] = useState<Record<number, boolean>>({});
 
-  useEffect(() => {
-    const courseId = window.location.pathname.split('/').pop();
-    const fetchCourse = async () => {
-      try {
-        // In production, use this:
-        // const response = await getCourseById(parseInt(courseId));
-        // setCourse(response.data);
-        
-        // For development, using mock data:
-        const mockCourse = mockData.courses.find(c => c.id === parseInt(courseId));
-        setCourse(mockCourse || null);
-        
-        // Initialize attendance states
-        if (mockCourse) {
-          const states = {};
-          mockCourse.students.forEach(student => {
-            states[student.id] = false; // Initialize all as absent
-          });
-          setAttendanceStates(states);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        setError('Error al cargar el curso');
-        setLoading(false);
-      }
-    };
+  console.log(course)
 
-    fetchCourse();
-  }, []);
+  useEffect(() => {
+    if (course) {
+      const states = {};
+      course.students.forEach(student => {
+        states[student.id] = false;
+      });
+      setAttendanceStates(states);
+      setLoading(false);
+    } else {
+      setError('Curso no encontrado');
+      setLoading(false);
+    }
+  }, [course]);
 
   const handleAttendanceToggle = async (studentId: number) => {
     try {

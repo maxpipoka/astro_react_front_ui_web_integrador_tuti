@@ -1,31 +1,60 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import StudentAttendanceList from '../../components/StudentAttendanceList';
-import { mockData } from '../../services/api';
+import { useCoursesStore } from '../../stores/coursesStore';
 
-export async function getStaticPaths() {
-  // In production, fetch courses from API:
-  // const response = await fetch('http://your-api/courses');
-  // const courses = await response.json();
-  
-  // For development, using mock data:
-  const courses = mockData.courses;
-
-  return courses.map(course => ({
-    params: { id: course.id.toString() },
-    props: { course },
-  }));
+// Astro no puede usar Zustand en getStaticPaths porque se ejecuta en el servidor
+// En su lugar, generaremos rutas dinámicas para cualquier ID
+export function getStaticPaths() {
+  return [
+    { params: { id: undefined } }
+  ];
 }
 
-const { course } = Astro.props;
+const { id } = Astro.params;
 ---
 
 <DashboardLayout title="Registrar Asistencia">
   <div class="space-y-6">
-    <div>
-      <h2 class="text-2xl font-bold text-custom-text">Registrar Asistencia</h2>
-      <p class="text-custom-text mt-2">Marque la asistencia de los alumnos</p>
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="text-2xl font-bold text-custom-text">Registrar Asistencia</h2>
+        <p class="text-custom-text mt-2">Marque la asistencia de los alumnos</p>
+      </div>
+      <button
+        id="closeAttendanceBtn"
+        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors"
+      >
+        CERRAR ASISTENCIA
+      </button>
     </div>
-    <StudentAttendanceList client:load />
+    <StudentAttendanceList client:load courseId={parseInt(id)} />
   </div>
 </DashboardLayout>
+
+<script>
+  import { useAuth } from '../../hooks/useAuth';
+  import { closeAttendance } from '../../services/api';
+
+  const closeAttendanceBtn = document.getElementById('closeAttendanceBtn');
+  const courseId = parseInt(window.location.pathname.split('/').pop() || '0');
+
+  closeAttendanceBtn?.addEventListener('click', async () => {
+    const confirmed = window.confirm('¿Está seguro que desea cerrar la asistencia? Esta acción no se puede deshacer.');
+    
+    if (confirmed) {
+      try {
+        const auth = useAuth.getState();
+        if (!auth.token) {
+          throw new Error('No se encontró el token de autenticación');
+        }
+
+        await closeAttendance(courseId, auth.token);
+        alert('La asistencia se ha cerrado correctamente');
+        window.location.href = '/register-attendance';
+      } catch (error) {
+        alert('Error al cerrar la asistencia: ' + (error.response?.data?.message || error.message));
+      }
+    }
+  });
+</script>
