@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
+import ThemeScript from '../components/ThemeScript.astro';
 
 interface Props {
   title: string;
@@ -14,10 +15,11 @@ const { title } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} - Attendance System</title>
+    <title>{title} - Sistema de Asistencia</title>
+    <ThemeScript />
   </head>
-  <body class="bg-custom-background">
-    <div class="min-h-screen">
+  <body class="transition-colors duration-200">
+    <div class="min-h-screen bg-custom-background dark:bg-gray-900">
       <Header client:load />
       <div class="flex">
         <Sidebar client:load />
