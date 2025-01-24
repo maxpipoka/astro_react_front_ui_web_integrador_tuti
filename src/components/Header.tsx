@@ -49,7 +49,6 @@ const Header = () => {
           <h1 className="text-2xl font-bold text-custom-text dark:text-white">Registro de Asistencia</h1>
         </div>
         <div className="flex items-center gap-4">
-          <ThemeToggle />
           <span className="text-custom-text dark:text-gray-200">{currentDate}</span>
           <div className="flex items-center gap-2">
             <span className="text-sm text-custom-secondary dark:text-gray-400">Usuario: <span className="text-custom-text dark:text-white font-medium">{username}</span></span>
@@ -60,6 +59,7 @@ const Header = () => {
             >
               Cerrar Sesión
             </button>
+          <ThemeToggle />
           </div>
         </div>
       </div>

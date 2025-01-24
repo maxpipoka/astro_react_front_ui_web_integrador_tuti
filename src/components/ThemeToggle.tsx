@@ -16,7 +16,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg bg-custom-primary dark:bg-gray-700 text-custom-text dark:text-gray-200 hover:bg-opacity-80 transition-colors"
+      className="p-2 rounded-lg bg-custom-lightblue dark:bg-gray-700 text-gray-200 dark:text-gray-200 hover:bg-opacity-80 transition-colors"
       aria-label="Toggle theme"
     >
       {isDark ? <FaSun className="w-5 h-5" /> : <FaMoon className="w-5 h-5" />}
