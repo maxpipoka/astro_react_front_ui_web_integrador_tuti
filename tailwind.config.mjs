@@ -11,7 +11,8 @@ export default {
           secondary: 'rgb(1, 0, 1)',
           accent: 'rgb(232, 161, 59)',
           text: 'rgb(1, 0, 1)',
-          lightblue:'rgb(55, 65, 81)'
+          lightblue:'rgb(55, 65, 81)',
+          darkblue:'rgb(17, 24, 39)'
         }
       }
     },

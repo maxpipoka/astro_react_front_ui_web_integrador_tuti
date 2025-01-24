@@ -43,10 +43,10 @@ const AttendanceReview = () => {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="bg-custom-primary p-6 rounded-lg shadow-md">
+      <form onSubmit={handleSubmit} className="bg-custom-primary dark:bg-custom-lightblue p-6 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="course" className="block text-custom-text font-medium mb-2">
+            <label htmlFor="course" className="block text-custom-text dark:text-gray-50 font-medium mb-2">
               Curso
             </label>
             <select
@@ -66,7 +66,7 @@ const AttendanceReview = () => {
           </div>
 
           <div>
-            <label htmlFor="date" className="block text-custom-text font-medium mb-2">
+            <label htmlFor="date" className="block text-custom-text dark:text-gray-50 font-medium mb-2">
               Fecha
             </label>
             <input
@@ -83,7 +83,7 @@ const AttendanceReview = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`mt-6 w-full bg-custom-accent text-white font-medium py-2 px-4 rounded transition-opacity
+          className={`mt-6 w-full bg-custom-accent dark:bg-custom-darkblue text-white font-medium py-2 px-4 rounded transition-opacity
             ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
         >
           {loading ? 'Buscando...' : 'Buscar'}
@@ -98,7 +98,7 @@ const AttendanceReview = () => {
 
       {loading && (
         <div className="text-center py-8">
-          <p className="text-custom-text">Cargando datos de asistencia...</p>
+          <p className="text-custom-text dark:text-gray-50">Cargando datos de asistencia...</p>
         </div>
       )}
 
