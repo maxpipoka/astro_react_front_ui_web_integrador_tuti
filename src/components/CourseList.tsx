@@ -77,7 +77,7 @@ const CourseList = () => {
   if (loading) {
     return (
       <div className="text-center py-8">
-        <p className="text-custom-text">Cargando cursos...</p>
+        <p className="text-custom-text dark:text-white mb-2">Cargando cursos...</p>
         <CourseListSkeleton />
       </div>
     );
