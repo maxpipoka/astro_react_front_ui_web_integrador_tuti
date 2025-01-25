@@ -10,7 +10,7 @@ const AttendanceToggle = ({ isPresent, onChange }: AttendanceToggleProps) => {
     <button
       onClick={onChange}
       className={`
-        px-4 py-2 rounded-full font-medium transition-all duration-200
+        w-full md:w-auto px-4 py-2 rounded-full font-medium transition-all duration-200 text-center
         ${isPresent 
           ? 'bg-green-500 hover:bg-green-600 text-white' 
           : 'bg-red-500 hover:bg-red-600 text-white'

@@ -22,16 +22,13 @@ const AttendanceTable = ({ courseId, date, attendanceData }: AttendanceTableProp
   const generatePDF = () => {
     const doc = new jsPDF();
     
-    // Título del documento
     doc.setFontSize(16);
     doc.text('Reporte de Asistencia', 14, 20);
     
-    // Información del curso
     doc.setFontSize(12);
     doc.text(`Curso: ${course?.level}° "${course?.division}" - ${course?.year}`, 14, 30);
     doc.text(`Fecha: ${format(new Date(date), 'dd/MM/yyyy')}`, 14, 40);
     
-    // Tabla de asistencia
     const tableData = attendanceData.map(student => [
       student.surnames,
       student.names,
@@ -51,7 +48,6 @@ const AttendanceTable = ({ courseId, date, attendanceData }: AttendanceTableProp
       }
     });
 
-    // Estadísticas
     const totalStudents = attendanceData.length;
     const presentStudents = attendanceData.filter(s => s.state).length;
     const absentStudents = totalStudents - presentStudents;
@@ -65,8 +61,7 @@ const AttendanceTable = ({ courseId, date, attendanceData }: AttendanceTableProp
     doc.text(`Ausentes: ${absentStudents}`, 14, finalY + 30);
     doc.text(`Porcentaje de asistencia: ${attendancePercentage}%`, 14, finalY + 40);
 
-    // Guardar el PDF
-    doc.save(`Informe_asistencia_diaria_${course?.level}_${course?.division}_${date}.pdf`);
+    doc.save(`asistencia_${course?.level}_${course?.division}_${date}.pdf`);
   };
 
   if (!course) {
@@ -86,44 +81,44 @@ const AttendanceTable = ({ courseId, date, attendanceData }: AttendanceTableProp
   }
 
   return (
-    <div className="bg-white dark:bg-custom-darkblue rounded-lg shadow-md overflow-hidden">
-      <div className="p-6 bg-custom-primary dark:bg-custom-lightblue flex justify-between items-center">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="p-4 md:p-6 bg-custom-primary flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h3 className="text-xl font-bold text-custom-text dark:text-gray-50">
+          <h3 className="text-lg md:text-xl font-bold text-custom-text text-center md:text-left">
             {course.level}° "{course.division}" - {course.year}
           </h3>
-          <p className="text-custom-text dark:text-gray-50 mt-2">
+          <p className="text-custom-text mt-2 text-center md:text-left">
             Fecha: {format(new Date(date), 'dd/MM/yyyy')}
           </p>
         </div>
         <button
           onClick={generatePDF}
-          className="flex items-center gap-2 bg-custom-accent dark:bg-custom-darkblue text-black dark:text-white px-4 py-2 rounded hover:opacity-90 transition-opacity"
+          className="w-full md:w-auto flex items-center justify-center gap-2 bg-custom-accent text-white px-4 py-2 rounded hover:opacity-90 transition-opacity"
         >
           <FaFilePdf />
           Generar PDF
         </button>
       </div>
       
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="text-left py-3 px-4 text-custom-text dark:text-gray-50">Apellidos</th>
-                <th className="text-left py-3 px-4 text-custom-text dark:text-gray-50">Nombres</th>
-                <th className="text-center py-3 px-4 text-custom-text dark:text-gray-50">Estado</th>
+                <th className="text-left py-3 px-2 md:px-4 text-custom-text">Apellidos</th>
+                <th className="text-left py-3 px-2 md:px-4 text-custom-text">Nombres</th>
+                <th className="text-center py-3 px-2 md:px-4 text-custom-text">Estado</th>
               </tr>
             </thead>
             <tbody>
               {attendanceData.map((attendance, index) => (
-                <tr key={index} className="border-b hover:bg-custom-lightblue">
-                  <td className="py-3 px-4 text-custom-text dark:text-gray-50">{attendance.surnames}</td>
-                  <td className="py-3 px-4 text-custom-text dark:text-gray-50">{attendance.names}</td>
-                  <td className="py-3 px-4">
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="py-3 px-2 md:px-4 text-custom-text text-sm md:text-base">{attendance.surnames}</td>
+                  <td className="py-3 px-2 md:px-4 text-custom-text text-sm md:text-base">{attendance.names}</td>
+                  <td className="py-3 px-2 md:px-4">
                     <div className="flex justify-center">
                       <span
-                        className={`px-3 py-1 rounded-full text-white text-sm font-medium
+                        className={`px-2 md:px-3 py-1 rounded-full text-white text-xs md:text-sm font-medium
                           ${attendance.state ? 'bg-green-500' : 'bg-red-500'}`}
                       >
                         {attendance.state ? 'PRESENTE' : 'AUSENTE'}

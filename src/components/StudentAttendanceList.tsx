@@ -14,8 +14,6 @@ const StudentAttendanceList = ({ courseId }: StudentAttendanceListProps) => {
   const [error, setError] = useState<string | null>(null);
   const [attendanceStates, setAttendanceStates] = useState<Record<number, boolean>>({});
 
-  console.log(course)
-
   useEffect(() => {
     if (course) {
       const states = {};
@@ -33,24 +31,11 @@ const StudentAttendanceList = ({ courseId }: StudentAttendanceListProps) => {
   const handleAttendanceToggle = async (studentId: number) => {
     try {
       const newState = !attendanceStates[studentId];
-      
-      // In production, use this:
-      // await registerAttendance({
-      //   courseId: course.id,
-      //   studentId,
-      //   date: format(new Date(), 'yyyy-MM-dd'),
-      //   state: newState
-      // });
-
-      // For development, simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
-
       setAttendanceStates(prev => ({
         ...prev,
         [studentId]: newState
       }));
-
-      // Show success message
       alert(newState ? 
         'Asistencia registrada correctamente' : 
         'Inasistencia registrada correctamente'
@@ -77,7 +62,7 @@ const StudentAttendanceList = ({ courseId }: StudentAttendanceListProps) => {
   }
 
   return (
-    <div className="bg-white dark:bg-custom-darkblue rounded-lg shadow-md overflow-hidden ">
+    <div className="bg-white dark:bg-custom-darkblue rounded-lg shadow-md overflow-hidden">
       <div className="p-6 bg-custom-primary dark:bg-custom-lightblue">
         <h3 className="text-xl font-bold text-custom-text dark:text-gray-50">
           {course.level}° "{course.division}" - {course.year}
@@ -87,35 +72,59 @@ const StudentAttendanceList = ({ courseId }: StudentAttendanceListProps) => {
         </p>
       </div>
       
-      <div className="p-6">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-3 px-4 text-custom-text dark:text-green-50">DNI</th>
-                <th className="text-left py-3 px-4 text-custom-text dark:text-green-50">Apellidos</th>
-                <th className="text-left py-3 px-4 text-custom-text dark:text-green-50">Nombres</th>
-                <th className="text-center py-3 px-4 text-custom-text dark:text-green-50">Asistencia</th>
-              </tr>
-            </thead>
-            <tbody>
-              {course.students.map(student => (
-                <tr key={student.id} className="border-b hover:bg-custom-lightblue">
-                  <td className="py-3 px-4 text-custom-text dark:text-green-50">{student.dni}</td>
-                  <td className="py-3 px-4 text-custom-text dark:text-green-50">{student.surnames}</td>
-                  <td className="py-3 px-4 text-custom-text dark:text-green-50">{student.names}</td>
-                  <td className="py-3 px-4">
-                    <div className="flex justify-center">
-                      <AttendanceToggle
-                        isPresent={attendanceStates[student.id]}
-                        onChange={() => handleAttendanceToggle(student.id)}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="p-4">
+        {/* Encabezados de columna para desktop */}
+        <div className="hidden md:grid md:grid-cols-4 md:gap-4 md:mb-4 md:px-4 md:py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <div className="text-custom-text dark:text-gray-200 font-semibold">DNI</div>
+          <div className="text-custom-text dark:text-gray-200 font-semibold">Apellidos</div>
+          <div className="text-custom-text dark:text-gray-200 font-semibold">Nombres</div>
+          <div className="text-custom-text dark:text-gray-200 font-semibold text-center">Asistencia</div>
+        </div>
+
+        <div className="grid gap-4">
+          {course.students.map(student => (
+            <div 
+              key={student.id} 
+              className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
+            >
+              {/* Vista móvil */}
+              <div className="md:hidden">
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="text-sm">
+                    <span className="block text-gray-500 dark:text-gray-400">DNI</span>
+                    <span className="font-medium text-custom-text dark:text-gray-50">{student.dni}</span>
+                  </div>
+                  <div className="text-sm">
+                    <span className="block text-gray-500 dark:text-gray-400">Apellidos</span>
+                    <span className="font-medium text-custom-text dark:text-gray-50">{student.surnames}</span>
+                  </div>
+                  <div className="text-sm">
+                    <span className="block text-gray-500 dark:text-gray-400">Nombres</span>
+                    <span className="font-medium text-custom-text dark:text-gray-50">{student.names}</span>
+                  </div>
+                </div>
+                <div className="w-full">
+                  <AttendanceToggle
+                    isPresent={attendanceStates[student.id]}
+                    onChange={() => handleAttendanceToggle(student.id)}
+                  />
+                </div>
+              </div>
+
+              {/* Vista desktop */}
+              <div className="hidden md:grid md:grid-cols-4 md:gap-4 md:items-center">
+                <div className="text-custom-text dark:text-gray-50">{student.dni}</div>
+                <div className="text-custom-text dark:text-gray-50">{student.surnames}</div>
+                <div className="text-custom-text dark:text-gray-50">{student.names}</div>
+                <div className="flex justify-center">
+                  <AttendanceToggle
+                    isPresent={attendanceStates[student.id]}
+                    onChange={() => handleAttendanceToggle(student.id)}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
