@@ -65,6 +65,58 @@ export const getAttendanceByDayAndCourse = async (courseId: number, date: string
   }
 }
 
+export const getAllStudents = async (token: string) => {
+  try {
+    const response = await api.get('/alumnos', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getStudentReport = async (studentId: number, token: string) => {
+  try {
+    const response = await api.get(`/asistencias/alumno/${studentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const getStudentById = async (studentId: number, token: string) => {
+  try {
+    const response = await api.get(`/alumnos/${studentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const getAllCourses = async (token: string) => {
+  try {
+    const response = await api.get('/cursos', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const mockData = {
   // ... rest of the mock data
 };

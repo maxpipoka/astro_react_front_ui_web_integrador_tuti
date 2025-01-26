@@ -1,0 +1,361 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import { format } from 'date-fns';
+
+interface StudentReport {
+  id: number;
+  dni: number;
+  names: string;
+  surnames: string;
+  attendance: {
+    active: boolean;
+    course_id: number;
+    created_at: string;
+    day: string;
+    id: number;
+    state: boolean;
+    student_id: number;
+    updated_at: string | null;
+  }[];
+}
+
+export function getStaticPaths() {
+  return [
+    { params: { id: undefined } }
+  ];
+}
+
+const { id } = Astro.params;
+---
+
+<DashboardLayout title="Reporte de Asistencia">
+  <div class="space-y-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-custom-text dark:text-gray-50">Reporte de Asistencia</h2>
+        <p class="text-custom-text dark:text-gray-50 mt-2">Historial de asistencias del alumno</p>
+      </div>
+      <button
+        id="downloadPdfBtn"
+        disabled
+        class="bg-custom-accent hover:opacity-90 text-black font-medium py-2 px-4 rounded transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586L7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
+        </svg>
+        Descargar PDF
+      </button>
+    </div>
+
+    <div id="studentInfo" class="bg-white dark:bg-custom-darkblue rounded-lg shadow-md p-6">
+      <div class="animate-pulse">
+        <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
+        <div class="space-y-3">
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-custom-darkblue rounded-lg shadow-md overflow-hidden">
+      <div class="p-4 md:p-6">
+        <h3 class="text-lg font-semibold text-custom-text dark:text-gray-50 mb-4">Historial de Asistencias</h3>
+        
+        <!-- Encabezados de columna para desktop -->
+        <div class="hidden md:grid md:grid-cols-3 md:gap-4 md:mb-4 md:px-4 md:py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <div class="text-custom-text dark:text-gray-200 font-semibold">Fecha</div>
+          <div class="text-custom-text dark:text-gray-200 font-semibold">Curso</div>
+          <div class="text-custom-text dark:text-gray-200 font-semibold text-center">Estado</div>
+        </div>
+
+        <div id="attendanceTableBody" class="grid gap-4">
+          <div class="text-center py-4 text-custom-text dark:text-gray-400">
+            Cargando datos...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  import { format } from 'date-fns';
+  import jsPDF from 'jspdf';
+  import autoTable from 'jspdf-autotable';
+  import { getStudentReport, getStudentById, getAllCourses } from '../../services/api';
+
+  let currentStudent = null;
+  let coursesMap = new Map();
+
+  const formatDate = (date) => {
+    try {
+      return format(new Date(date), 'dd/MM/yyyy');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return date;
+    }
+  };
+
+  const getCourseInfo = (courseId) => {
+    const course = coursesMap.get(courseId);
+    if (!course) {
+      return { level: 'N/A', division: 'N/A', year: 'N/A' };
+    }
+    return course;
+  };
+
+  const generatePDF = () => {
+    if (!currentStudent) return;
+
+    const doc = new jsPDF();
+    
+    // Título
+    doc.setFontSize(16);
+    doc.text('Reporte de Asistencia', 14, 20);
+    
+    // Información del estudiante
+    doc.setFontSize(12);
+    doc.text(`Alumno: ${currentStudent.surnames}, ${currentStudent.names}`, 14, 30);
+    doc.text(`DNI: ${currentStudent.dni}`, 14, 40);
+    
+    const presentCount = currentStudent.attendance.filter(a => a.state).length;
+    const totalCount = currentStudent.attendance.length;
+    const attendancePercentage = ((presentCount / totalCount) * 100).toFixed(2);
+    
+    doc.text(`Asistencias: ${presentCount} de ${totalCount} (${attendancePercentage}%)`, 14, 50);
+    
+    // Tabla de asistencias
+    const tableData = currentStudent.attendance
+      .sort((a, b) => new Date(b.day).getTime() - new Date(a.day).getTime())
+      .map(record => {
+        const course = getCourseInfo(record.course_id);
+        return [
+          formatDate(record.day),
+          `${course.level}° "${course.division}" - ${course.year}`,
+          record.state ? 'PRESENTE' : 'AUSENTE'
+        ];
+      });
+
+    autoTable(doc, {
+      head: [['Fecha', 'Curso', 'Estado']],
+      body: tableData,
+      startY: 60,
+      styles: {
+        fontSize: 10,
+        cellPadding: 3
+      },
+      headStyles: {
+        fillColor: [232, 161, 59]
+      }
+    });
+
+    doc.save(`reporte_${currentStudent.surnames}_${currentStudent.names}.pdf`);
+  };
+
+  const updateStudentInfo = (student) => {
+    const studentInfo = document.getElementById('studentInfo');
+    if (!studentInfo) return;
+
+    if (!student || !student.attendance) {
+      studentInfo.innerHTML = `
+        <div class="text-red-600 dark:text-red-400 text-center py-4">
+          Error: Datos del estudiante no disponibles
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const presentCount = Array.isArray(student.attendance) ? 
+        student.attendance.filter(a => a.state).length : 0;
+      const totalCount = Array.isArray(student.attendance) ? 
+        student.attendance.length : 0;
+      const attendancePercentage = totalCount > 0 ? 
+        ((presentCount / totalCount) * 100).toFixed(2) : '0.00';
+
+      studentInfo.innerHTML = `
+        <h3 class="text-xl font-semibold text-custom-text dark:text-gray-50 mb-4">
+          ${student.surnames || ''}, ${student.names || ''}
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <p class="text-gray-500 dark:text-gray-400">DNI</p>
+            <p class="text-custom-text dark:text-gray-50 font-medium">${student.dni || 'N/A'}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 dark:text-gray-400">Total de Asistencias</p>
+            <p class="text-custom-text dark:text-gray-50 font-medium">
+              ${presentCount} de ${totalCount}
+            </p>
+          </div>
+          <div>
+            <p class="text-gray-500 dark:text-gray-400">Porcentaje</p>
+            <p class="text-custom-text dark:text-gray-50 font-medium">
+              ${attendancePercentage}%
+            </p>
+          </div>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error updating student info:', error);
+      studentInfo.innerHTML = `
+        <div class="text-red-600 dark:text-red-400 text-center py-4">
+          Error al procesar los datos del estudiante
+        </div>
+      `;
+    }
+  };
+
+  const updateAttendanceTable = (attendance) => {
+    const tableBody = document.getElementById('attendanceTableBody');
+    if (!tableBody) return;
+
+    if (!Array.isArray(attendance) || attendance.length === 0) {
+      tableBody.innerHTML = `
+        <div class="text-center py-4 text-custom-text dark:text-gray-400">
+          No hay registros de asistencia
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      tableBody.innerHTML = attendance
+        .sort((a, b) => new Date(b.day).getTime() - new Date(a.day).getTime())
+        .map(record => {
+          const course = getCourseInfo(record.course_id);
+          return `
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <!-- Vista móvil -->
+              <div class="md:hidden">
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                  <div class="text-sm">
+                    <span class="block text-gray-500 dark:text-gray-400">Fecha</span>
+                    <span class="font-medium text-custom-text dark:text-gray-50">${formatDate(record.day)}</span>
+                  </div>
+                  <div class="text-sm col-span-2">
+                    <span class="block text-gray-500 dark:text-gray-400">Curso</span>
+                    <span class="font-medium text-custom-text dark:text-gray-50">
+                      ${course.level}° "${course.division}" - ${course.year}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex justify-center">
+                  <span class="px-2 py-1 rounded-full text-xs font-semibold ${
+                    record.state
+                      ? 'bg-green-100 text-green-500 dark:bg-green-500 dark:text-green-100'
+                      : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                  }">
+                    ${record.state ? 'PRESENTE' : 'AUSENTE'}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Vista desktop -->
+              <div class="hidden md:grid md:grid-cols-3 md:gap-4 md:items-center">
+                <div class="text-custom-text dark:text-gray-50">${formatDate(record.day)}</div>
+                <div class="text-custom-text dark:text-gray-50">
+                  ${course.level}° "${course.division}" - ${course.year}
+                </div>
+                <div class="flex justify-center">
+                  <span class="px-2 py-1 rounded-full text-xs font-semibold ${
+                    record.state
+                      ? 'bg-green-500 text-white dark:bg-green-500 dark:text-white'
+                      : 'bg-red-500 text-white dark:bg-red-500 dark:text-white'
+                  }">
+                    ${record.state ? 'PRESENTE' : 'AUSENTE'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    } catch (error) {
+      console.error('Error updating attendance table:', error);
+      tableBody.innerHTML = `
+        <div class="text-center py-4 text-red-600 dark:text-red-400">
+          Error al procesar los datos de asistencia
+        </div>
+      `;
+    }
+  };
+
+  const init = async () => {
+    const studentId = window.location.pathname.split('/').pop();
+    const downloadBtn = document.getElementById('downloadPdfBtn');
+    
+    try {
+      const authData = JSON.parse(localStorage.getItem('sie-auth-storage'));
+      const token = authData?.state?.token;
+
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
+      // Obtener datos del estudiante, su reporte y los cursos
+      const [studentResponse, reportResponse, coursesResponse] = await Promise.all([
+        getStudentById(parseInt(studentId), token),
+        getStudentReport(parseInt(studentId), token),
+        getAllCourses(token)
+      ]);
+
+      if (!studentResponse?.data || !reportResponse?.data || !coursesResponse?.data) {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      // Crear mapa de cursos para búsqueda rápida
+      coursesMap = new Map(
+        coursesResponse.data.map(course => [course.id, course])
+      );
+
+      // Combinar datos del estudiante con su reporte de asistencia
+      currentStudent = {
+        ...studentResponse.data,
+        attendance: reportResponse.data
+      };
+
+      updateStudentInfo(currentStudent);
+      updateAttendanceTable(currentStudent.attendance);
+
+      // Habilitar el botón de descarga
+      if (downloadBtn) {
+        (downloadBtn as HTMLButtonElement).disabled = false;
+        downloadBtn.addEventListener('click', generatePDF);
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Error al cargar los datos';
+      
+      const studentInfo = document.getElementById('studentInfo');
+      if (studentInfo) {
+        studentInfo.innerHTML = `
+          <div class="text-red-600 dark:text-red-400 text-center py-4">
+            ${errorMessage}
+          </div>
+        `;
+      }
+
+      const tableBody = document.getElementById('attendanceTableBody');
+      if (tableBody) {
+        tableBody.innerHTML = `
+          <div class="text-center py-4 text-red-600 dark:text-red-400">
+            ${errorMessage}
+          </div>
+        `;
+      }
+
+      if (downloadBtn) {
+        (downloadBtn as HTMLButtonElement).disabled = true;
+      }
+    }
+  };
+
+  // Ejecutar la inicialización cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>
