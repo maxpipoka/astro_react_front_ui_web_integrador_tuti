@@ -78,9 +78,9 @@ export const getAllStudents = async (token: string) => {
   }
 };
 
-export const getStudentReport = async (studentId: number, token: string) => {
+export const getStudentReport = async (studentId: number, startDate: string, endDate: string, token: string) => {
   try {
-    const response = await api.get(`/asistencias/alumno/${studentId}`, {
+    const response = await api.get(`/asistencias/alumno/${studentId}?start=${startDate}&end=${endDate}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getAllStudents } from '../services/api';
+import { format } from 'date-fns';
 
 interface Student {
   id: number;
@@ -16,6 +17,8 @@ const StudentSearch = () => {
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [displayedStudents, setDisplayedStudents] = useState<Student[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -82,6 +85,11 @@ const StudentSearch = () => {
     setHasMore(end < filteredStudents.length);
   }, [page, filteredStudents]);
 
+  const handleStudentClick = (studentId: number) => {
+    // Add date parameters to the URL
+    window.location.href = `/student-report/${studentId}?start=${startDate}&end=${endDate}`;
+  };
+
   if (loading) {
     return (
       <div>
@@ -92,6 +100,10 @@ const StudentSearch = () => {
             className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-custom-accent focus:border-transparent bg-white dark:bg-gray-700 text-custom-text dark:text-white"
             disabled
           />
+        </div>
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="animate-pulse h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="animate-pulse h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
         </div>
         <div className="space-y-4">
           {[1, 2, 3, 4, 5].map((index) => (
@@ -132,6 +144,33 @@ const StudentSearch = () => {
         />
       </div>
 
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="startDate" className="block text-sm font-medium text-custom-text dark:text-gray-300 mb-2">
+            Fecha Desde
+          </label>
+          <input
+            type="date"
+            id="startDate"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-custom-accent focus:border-transparent bg-white dark:bg-gray-700 text-custom-text dark:text-white"
+          />
+        </div>
+        <div>
+          <label htmlFor="endDate" className="block text-sm font-medium text-custom-text dark:text-gray-300 mb-2">
+            Fecha Hasta
+          </label>
+          <input
+            type="date"
+            id="endDate"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-custom-accent focus:border-transparent bg-white dark:bg-gray-700 text-custom-text dark:text-white"
+          />
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-custom-darkblue rounded-lg shadow-md overflow-hidden">
         <div className="grid gap-4 p-4">
           {displayedStudents.length === 0 ? (
@@ -143,10 +182,10 @@ const StudentSearch = () => {
               {displayedStudents.map((student, index) => {
                 if (displayedStudents.length === index + 1) {
                   return (
-                    <a
+                    <div
                       ref={lastStudentElementRef}
                       key={student.id}
-                      href={`/student-report/${student.id}`}
+                      onClick={() => handleStudentClick(student.id)}
                       className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                     >
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -163,13 +202,13 @@ const StudentSearch = () => {
                           <span className="font-medium text-custom-text dark:text-gray-50">{student.names}</span>
                         </div>
                       </div>
-                    </a>
+                    </div>
                   );
                 } else {
                   return (
-                    <a
+                    <div
                       key={student.id}
-                      href={`/student-report/${student.id}`}
+                      onClick={() => handleStudentClick(student.id)}
                       className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                     >
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -186,7 +225,7 @@ const StudentSearch = () => {
                           <span className="font-medium text-custom-text dark:text-gray-50">{student.names}</span>
                         </div>
                       </div>
-                    </a>
+                    </div>
                   );
                 }
               })}

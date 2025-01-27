@@ -1,23 +1,5 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
-import { format } from 'date-fns';
-
-interface StudentReport {
-  id: number;
-  dni: number;
-  names: string;
-  surnames: string;
-  attendance: {
-    active: boolean;
-    course_id: number;
-    created_at: string;
-    day: string;
-    id: number;
-    state: boolean;
-    student_id: number;
-    updated_at: string | null;
-  }[];
-}
 
 export function getStaticPaths() {
   return [
@@ -25,7 +7,6 @@ export function getStaticPaths() {
   ];
 }
 
-const { id } = Astro.params;
 ---
 
 <DashboardLayout title="Reporte de Asistencia">
@@ -79,7 +60,7 @@ const { id } = Astro.params;
 </DashboardLayout>
 
 <script>
-  import { format } from 'date-fns';
+  import { format, parse, isValid } from 'date-fns';
   import jsPDF from 'jspdf';
   import autoTable from 'jspdf-autotable';
   import { getStudentReport, getStudentById, getAllCourses } from '../../services/api';
@@ -87,14 +68,10 @@ const { id } = Astro.params;
   let currentStudent = null;
   let coursesMap = new Map();
 
-  const formatDate = (date) => {
-    try {
-      return format(new Date(date), 'dd/MM/yyyy');
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return date;
-    }
-  };
+  function formatDate(dateString) {
+    // Reemplaza los guiones por barras
+    return dateString.replace(/-/g, '/');
+}
 
   const getCourseInfo = (courseId) => {
     const course = coursesMap.get(courseId);
@@ -126,11 +103,10 @@ const { id } = Astro.params;
     
     // Tabla de asistencias
     const tableData = currentStudent.attendance
-      .sort((a, b) => new Date(b.day).getTime() - new Date(a.day).getTime())
       .map(record => {
         const course = getCourseInfo(record.course_id);
         return [
-          formatDate(record.day),
+          record.day,
           `${course.level}° "${course.division}" - ${course.year}`,
           record.state ? 'PRESENTE' : 'AUSENTE'
         ];
@@ -149,7 +125,8 @@ const { id } = Astro.params;
       }
     });
 
-    doc.save(`reporte_${currentStudent.surnames}_${currentStudent.names}.pdf`);
+    const currentDate = new Date().toISOString().split('T')[0]
+    doc.save(`Reporte_de_Asistencia_${currentStudent.surnames}_${currentStudent.names}_${currentDate}.pdf`);
   };
 
   const updateStudentInfo = (student) => {
@@ -221,7 +198,6 @@ const { id } = Astro.params;
 
     try {
       tableBody.innerHTML = attendance
-        .sort((a, b) => new Date(b.day).getTime() - new Date(a.day).getTime())
         .map(record => {
           const course = getCourseInfo(record.course_id);
           return `
@@ -243,7 +219,7 @@ const { id } = Astro.params;
                 <div class="flex justify-center">
                   <span class="px-2 py-1 rounded-full text-xs font-semibold ${
                     record.state
-                      ? 'bg-green-100 text-green-500 dark:bg-green-500 dark:text-green-100'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
                       : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
                   }">
                     ${record.state ? 'PRESENTE' : 'AUSENTE'}
@@ -260,8 +236,8 @@ const { id } = Astro.params;
                 <div class="flex justify-center">
                   <span class="px-2 py-1 rounded-full text-xs font-semibold ${
                     record.state
-                      ? 'bg-green-500 text-white dark:bg-green-500 dark:text-white'
-                      : 'bg-red-500 text-white dark:bg-red-500 dark:text-white'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                      : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
                   }">
                     ${record.state ? 'PRESENTE' : 'AUSENTE'}
                   </span>
@@ -283,6 +259,9 @@ const { id } = Astro.params;
 
   const init = async () => {
     const studentId = window.location.pathname.split('/').pop();
+    const urlParams = new URLSearchParams(window.location.search)
+    const startDate = urlParams.get('start');
+    const endDate = urlParams.get('end');
     const downloadBtn = document.getElementById('downloadPdfBtn');
     
     try {
@@ -296,7 +275,7 @@ const { id } = Astro.params;
       // Obtener datos del estudiante, su reporte y los cursos
       const [studentResponse, reportResponse, coursesResponse] = await Promise.all([
         getStudentById(parseInt(studentId), token),
-        getStudentReport(parseInt(studentId), token),
+        getStudentReport(parseInt(studentId), startDate, endDate, token),
         getAllCourses(token)
       ]);
 

@@ -14,11 +14,8 @@ const LoginForm = () => {
     e.preventDefault();
     setError('');
 
-    console.log('Submitting login form with:', { username, password });
-
     try {
       const response = await login(username, password);
-      console.log('Login response:', response);
 
       if (response.data && response.data.token) {
         console.log('Login successful, token received:', response.data.token);
