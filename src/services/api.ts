@@ -117,6 +117,19 @@ export const getAllCourses = async (token: string) => {
   }
 };
 
+export const getUserDataById = async (token: string, userId: number) => {
+  try {
+    const response = await api.get('/usuarios/${userId}',{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response
+    } catch (error) {
+      throw error;
+    }
+  }
+
 export const mockData = {
   // ... rest of the mock data
 };
