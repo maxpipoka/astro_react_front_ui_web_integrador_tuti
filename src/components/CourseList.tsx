@@ -74,6 +74,10 @@ const CourseList = () => {
     return null;
   }
 
+  if (authData.accessLevel !== 3) {
+    window.location.replace('/')
+  }
+
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -98,6 +102,8 @@ const CourseList = () => {
       </div>
     );
   }
+
+
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-2">
