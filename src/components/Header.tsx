@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useAuth } from '../hooks/useAuth';
 import ThemeToggle from './ThemeToggle';
 import { FaBars } from 'react-icons/fa';
+import { es } from 'date-fns/locale';
 
 interface AuthData {
   token: string | null;
@@ -15,6 +16,19 @@ const Header = () => {
   const [authData, setAuthData] = useState<AuthData | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const auth = typeof window !== 'undefined' ? useAuth() : null;
+
+  const getAccessLevelText = (level) => {
+    switch (level) {
+      case 1:
+        return 'Administrador';
+      case 2:
+        return 'Secretario';
+      case 3:
+        return 'Preceptor';
+      default:
+        return 'Usuario';
+    }
+  };
 
   useEffect(() => {
     if (auth) {
@@ -35,7 +49,7 @@ const Header = () => {
     }
   };
 
-  const currentDate = format(new Date(), 'MMMM d, yyyy');
+  const currentDate = format(new Date(), 'd MMMM, yyyy', {locale: es});
 
   if (!authData) {
     return null;
@@ -65,7 +79,9 @@ const Header = () => {
               <span className="text-sm text-custom-secondary dark:text-gray-400">
                 Usuario: <span className="text-custom-text dark:text-white font-medium">{username}</span>
               </span>
-              <span className="text-sm text-custom-secondary dark:text-gray-400">{accessLevel}</span>
+              <span className="text-sm text-custom-secondary dark:text-gray-400">
+                Rol: <span className="text-custom-text dark:text-white font-medium">{getAccessLevelText(accessLevel)}</span>
+              </span>
               <button
                 onClick={handleLogout}
                 className="w-full md:w-auto px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm md:text-base"

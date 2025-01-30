@@ -119,7 +119,7 @@ export const getAllCourses = async (token: string) => {
 
 export const getUserDataById = async (token: string, userId: number) => {
   try {
-    const response = await api.get('/usuarios/${userId}',{
+    const response = await api.get(`/usuarios/${userId}`,{
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -129,6 +129,22 @@ export const getUserDataById = async (token: string, userId: number) => {
       throw error;
     }
   }
+
+export const updateUserData = async (token: string, userId: number, field: string, data: string) => {
+  try {
+    const response = await api.patch(`/usuarios/${userId}`, 
+      {[field]: data},
+      {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    })
+    return response
+  } catch (error){
+    throw error;
+  }
+}
 
 export const mockData = {
   // ... rest of the mock data

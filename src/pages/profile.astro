@@ -1,9 +1,8 @@
 ---
-// src/pages/mis-datos.astro
-import UserData from '../components/UserData';
 import DashboardLayout from '../layouts/DashboardLayout.astro';
+import UserData from '../components/UserData';
 ---
 
 <DashboardLayout title="Mis Datos">
-  <UserData />
+  <UserData client:load />
 </DashboardLayout>

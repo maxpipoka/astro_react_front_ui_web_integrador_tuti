@@ -1,13 +1,10 @@
-// src/components/UserData.tsx
 import React, { useState, useEffect } from 'react';
-import { getUserDataById } from '../services/api'; // Asegúrate de que la importación sea correcta
-import { useAuth } from '../hooks/useAuth';
+import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import { getUserDataById , updateUserData} from '../services/api';
 
-// Definimos el tipo para los datos del usuario
 interface UserData {
   id: number;
   username: string;
-  password: string;
   fullname: string;
   rol: string;
   created_at: string;
@@ -17,145 +14,277 @@ interface UserData {
 }
 
 const UserData: React.FC = () => {
-  const [userData, setUserData] = useState<UserData>({
-    id: 0,
-    username: '',
-    password: '',
-    fullname: '',
-    rol: '',
-    created_at: '',
-    updated_at: null,
-    active: true,
-    access_level: 0,
-  });
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [editingFullname, setEditingFullname] = useState(false);
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [tempFullname, setTempFullname] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  if (typeof window === 'undefined') {
-    return <p className='text-white dark:text-white'>Cargando...</p>;
-  }
+  // Get auth data from localStorage directly
+  const getAuthData = () => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const authData = localStorage.getItem('sie-auth-storage');
+      console.log('Raw auth data from localStorage:', authData);
+      
+      if (authData) {
+        const parsed = JSON.parse(authData);
+        console.log('Parsed auth data:', parsed);
+        return parsed.state;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error parsing auth data:', err);
+      return null;
+    }
+  };
 
-  // Obtenemos el token y el userId del hook useAuth
-  const { token, userId } = useAuth();
-
-  // Obtenemos los datos del usuario al cargar el componente
   useEffect(() => {
-    const fetchUser Data = async () => {
+    console.log('UserData component mounted');
+    
+    const fetchUserData = async () => {
+      console.log('Fetching user data...');
       try {
-        if (!token || !userId) {
+        const authData = getAuthData();
+        console.log('Auth data retrieved:', authData);
+
+        if (!authData?.token || !authData?.userId) {
+          console.error('Missing auth data:', { token: !!authData?.token, userId: authData?.userId });
           throw new Error('No se encontró el token o el ID del usuario');
         }
 
-        const data = await getUser DataById(token, userId);
-        setUser Data(data);
-      } catch (err) {
-        setError(err.message);
+        console.log('Making API call for user:', authData.userId);
+        const response = await getUserDataById(authData.token, authData.userId);
+        console.log('API Response:', response);
+
+        if (response?.data) {
+          console.log('Setting user data:', response.data);
+          setUserData(response.data);
+          setTempFullname(response.data.fullname);
+        } else {
+          throw new Error('No se recibieron datos del usuario');
+        }
+      } catch (err: any) {
+        console.error('Error in fetchUserData:', err);
+        setError(err.response?.data?.message || err.message || 'Error al cargar los datos del usuario');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser Data();
-  }, [token, userId]);
+    fetchUserData();
+  }, []);
 
-  if (loading) return <p>Cargando...</p>;
-  if (error) return <p>Error: {error}</p>;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setUserData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+  const handleSaveFullname = async () => {
+    setLoading(true);
+    setError(null);
+    const authData = getAuthData();
+  
+    try {
+      const response = await updateUserData(authData.token, authData.userId, 'fullname', tempFullname);
+      setUserData(prev => prev ? { ...prev, fullname: tempFullname } : null);
+      setEditingFullname(false);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error al actualizar el nombre');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewPassword(e.target.value);
-  };
-
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConfirmPassword(e.target.value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Verificar que las contraseñas coincidan
+  const handleSavePassword = async () => {
     if (newPassword !== confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
     }
-
+  
+    setLoading(true);
+    setError(null);
+    const authData = getAuthData();
+  
     try {
-      // Aquí harías la llamada a tu API para actualizar los datos del usuario
-      const response = await fetch('/api/user', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          fullname: userData.fullname,
-          password: newPassword || userData.password, // Envía la nueva contraseña o la actual si no se cambió
-        }),
-      });
-      if (!response.ok) throw new Error('Error al actualizar los datos');
-      alert('Datos actualizados correctamente');
-      setError(null);
-    } catch (err) {
-      setError(err.message);
+      await updateUserData(authData.token, authData.userId, 'password', newPassword);
+      setEditingPassword(false);
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error al actualizar la contraseña');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) return <p>Cargando...</p>;
-  if (error) return <p>Error: {error}</p>;
+  const cancelFullnameEdit = () => {
+    setTempFullname(userData?.fullname || '');
+    setEditingFullname(false);
+  };
+
+  const cancelPasswordEdit = () => {
+    setNewPassword('');
+    setConfirmPassword('');
+    setEditingPassword(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="animate-pulse p-6 bg-white dark:bg-custom-darkblue rounded-lg shadow-md">
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-6"></div>
+        <div className="space-y-4">
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-white dark:bg-custom-darkblue rounded-lg shadow-md">
+        <p className="text-red-600 dark:text-red-400">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1>Mis Datos</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            name="username"
-            value={userData.username}
-            onChange={handleChange}
-            disabled
-          />
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-custom-text dark:text-gray-50">Mis Datos</h2>
+        <p className="text-custom-text dark:text-gray-50 mt-2">Gestione su información personal</p>
+      </div>
+
+      <div className="bg-white dark:bg-custom-darkblue rounded-lg shadow-md p-6">
+        <div className="space-y-6">
+          {/* Username - No editable */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Nombre de Usuario
+            </label>
+            <input
+              type="text"
+              value={userData?.username || ''}
+              disabled
+              className="w-full p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300"
+            />
+          </div>
+
+          {/* Fullname */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Nombre Completo
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={editingFullname ? tempFullname : userData?.fullname || ''}
+                onChange={(e) => setTempFullname(e.target.value)}
+                disabled={!editingFullname}
+                className={`flex-1 p-2 border rounded-md ${
+                  editingFullname
+                    ? 'bg-white dark:bg-gray-800 border-custom-accent'
+                    : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
+                } text-gray-700 dark:text-gray-300`}
+              />
+              {!editingFullname ? (
+                <button
+                  onClick={() => setEditingFullname(true)}
+                  className="p-2 text-custom-accent hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                >
+                  <FaEdit className="w-5 h-5" />
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveFullname}
+                    className="p-2 text-green-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  >
+                    <FaSave className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={cancelFullnameEdit}
+                    className="p-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  >
+                    <FaTimes className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Contraseña
+            </label>
+            {!editingPassword ? (
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value="********"
+                  disabled
+                  className="flex-1 p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300"
+                />
+                <button
+                  onClick={() => setEditingPassword(true)}
+                  className="p-2 text-custom-accent hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                >
+                  <FaEdit className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Nueva contraseña"
+                    className="w-full p-2 border border-custom-accent rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirmar contraseña"
+                    className="w-full p-2 border border-custom-accent rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={handleSavePassword}
+                    className="p-2 text-green-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  >
+                    <FaSave className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={cancelPasswordEdit}
+                    className="p-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  >
+                    <FaTimes className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Rol - No editable */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Rol
+            </label>
+            <input
+              type="text"
+              value={userData?.rol || ''}
+              disabled
+              className="w-full p-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300"
+            />
+          </div>
         </div>
-        <div>
-          <label>Fullname:</label>
-          <input
-            type="text"
-            name="fullname"
-            value={userData.fullname}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Nueva contraseña:</label>
-          <input
-            type="password"
-            name="newPassword"
-            value={newPassword}
-            onChange={handlePasswordChange}
-          />
-        </div>
-        <div>
-          <label>Confirmar contraseña:</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-          />
-        </div>
-        <button type="submit">Guardar cambios</button>
-      </form>
+      </div>
     </div>
   );
 };
