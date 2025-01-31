@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useAuth } from '../hooks/useAuth';
 import ThemeToggle from './ThemeToggle';
-import { FaBars } from 'react-icons/fa';
+import { GrView } from "react-icons/gr";
 import { es } from 'date-fns/locale';
 
 interface AuthData {
@@ -70,7 +70,7 @@ const Header = () => {
             className="md:hidden text-custom-text dark:text-white"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            <FaBars className="h-6 w-6" />
+            <GrView className="h-6 w-6" />
           </button>
 
           <div className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col md:flex-row items-center gap-4 w-full md:w-auto`}>
