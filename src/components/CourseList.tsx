@@ -74,10 +74,6 @@ const CourseList = () => {
     return null;
   }
 
-  if (authData.accessLevel !== 3) {
-    window.location.replace('/')
-  }
-
   if (loading) {
     return (
       <div className="text-center py-8">

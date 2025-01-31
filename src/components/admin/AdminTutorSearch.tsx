@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { getAllStudents } from '../../services/api';
+import { getAllTutors } from '../../services/api';
 import { FaPlus } from 'react-icons/fa';
 import '../../styles/global.css';
 
-interface Student {
+interface Tutor {
   id: number;
   dni: number;
   names: string;
@@ -13,10 +13,10 @@ interface Student {
 
 const ITEMS_PER_PAGE = 20;
 
-const AdminStudentSearch = () => {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const [displayedStudents, setDisplayedStudents] = useState<Student[]>([]);
+const AdminTutorSearch = () => {
+  const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
+  const [displayedTutors, setDisplayedTutors] = useState<Tutor[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ const AdminStudentSearch = () => {
   const [hasMore, setHasMore] = useState(true);
 
   const observer = useRef<IntersectionObserver>();
-  const lastStudentElementRef = useCallback((node: HTMLElement | null) => {
+  const lastTutorElementRef = useCallback((node: HTMLElement | null) => {
     if (loading) return;
 
     if (observer.current) observer.current.disconnect();
@@ -41,7 +41,7 @@ const AdminStudentSearch = () => {
   const token = useAuth?.getState()?.token;
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchTutors = async () => {
       if (!token) {
         setError('No se pudo obtener la información de autenticación');
         setLoading(false);
@@ -49,47 +49,47 @@ const AdminStudentSearch = () => {
       }
 
       try {
-        const response = await getAllStudents(token);
-        setStudents(response.data);
-        setFilteredStudents(response.data);
+        const response = await getAllTutors(token);
+        setTutors(response.data);
+        setFilteredTutors(response.data);
         setLoading(false);
       } catch (err: any) {
-        setError(err.response?.data?.message || 'Error al obtener la lista de alumnos');
+        setError(err.response?.data?.message || 'Error al obtener la lista de tutores');
         setLoading(false);
       }
     };
 
-    fetchStudents();
+    fetchTutors();
   }, [token]);
 
   useEffect(() => {
-    const filtered = students.filter(student =>
-      student.names.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.surnames.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.dni.toString().includes(searchTerm)
+    const filtered = tutors.filter(tutor =>
+      tutor.names.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tutor.surnames.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tutor.dni.toString().includes(searchTerm)
     );
-    setFilteredStudents(filtered);
+    setFilteredTutors(filtered);
     setPage(1);
     setHasMore(true);
-  }, [searchTerm, students]);
+  }, [searchTerm, tutors]);
 
   useEffect(() => {
     const start = 0;
     const end = page * ITEMS_PER_PAGE;
-    const paginatedStudents = filteredStudents.slice(start, end);
-    setDisplayedStudents(paginatedStudents);
-    setHasMore(end < filteredStudents.length);
-  }, [page, filteredStudents]);
+    const paginatedTutors = filteredTutors.slice(start, end);
+    setDisplayedTutors(paginatedTutors);
+    setHasMore(end < filteredTutors.length);
+  }, [page, filteredTutors]);
 
-  const handleEditClick = (studentId: number) => {
-    const confirmEdit = window.confirm('¿Estás seguro de que deseas editar la información de este alumno?');
+  const handleEditClick = (tutorId: number) => {
+    const confirmEdit = window.confirm('¿Estás seguro de que deseas editar la información de este tutor?');
     if (confirmEdit) {
-      window.location.href = `/admin/student-edit/${studentId}`;
+      window.location.href = `/admin/tutor-edit/${tutorId}`;
     }
   };
 
   const handleNewStudent = () => {
-    window.location.href = '/admin/student-new';
+    window.location.href = '/admin/tutor-new';
   };
 
   if (loading) {
@@ -106,7 +106,7 @@ const AdminStudentSearch = () => {
             disabled
             className="bg-custom-accent text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 opacity-50"
           >
-            <FaPlus /> Nuevo Alumno
+            <FaPlus /> Nuevo Tutor
           </button>
         </div>
         <div className="space-y-4">
@@ -150,39 +150,39 @@ const AdminStudentSearch = () => {
           onClick={handleNewStudent}
           className="bg-custom-accent text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
         >
-          <FaPlus /> Nuevo Alumno
+          <FaPlus /> Nuevo Tutor
         </button>
       </div>
 
       <div className="bg-white dark:bg-custom-darkblue rounded-lg shadow-md overflow-hidden">
         <div className="grid gap-4 p-4">
-          {displayedStudents.length === 0 ? (
+          {displayedTutors.length === 0 ? (
             <p className="text-center text-custom-text dark:text-gray-400 py-4">
-              No se encontraron alumnos
+              No se encontraron tutores
             </p>
           ) : (
-            displayedStudents.map((student, index) => (
+            displayedTutors.map((tutor, index) => (
               <div
-                key={student.id}
-                ref={displayedStudents.length === index + 1 ? lastStudentElementRef : null}
+                key={tutor.id}
+                ref={displayedTutors.length === index + 1 ? lastTutorElementRef : null}
                 className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                   <div className="text-sm">
                     <span className="block text-gray-500 dark:text-gray-400">DNI</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{student.dni}</span>
+                    <span className="font-medium text-custom-text dark:text-gray-50">{tutor.dni}</span>
                   </div>
                   <div className="text-sm">
                     <span className="block text-gray-500 dark:text-gray-400">Apellidos</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{student.surnames}</span>
+                    <span className="font-medium text-custom-text dark:text-gray-50">{tutor.surnames}</span>
                   </div>
                   <div className="text-sm">
                     <span className="block text-gray-500 dark:text-gray-400">Nombres</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{student.names}</span>
+                    <span className="font-medium text-custom-text dark:text-gray-50">{tutor.names}</span>
                   </div>
                   <div className="flex justify-start md:justify-center">
                     <button
-                      onClick={() => handleEditClick(student.id)}
+                      onClick={() => handleEditClick(tutor.id)}
                       className="bg-custom-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
                     >
                       Editar
@@ -194,7 +194,7 @@ const AdminStudentSearch = () => {
           )}
           {loading && (
             <div className="text-center py-4">
-              <p className="text-custom-text dark:text-gray-400">Cargando más alumnos...</p>
+              <p className="text-custom-text dark:text-gray-400">Cargando más tutores...</p>
             </div>
           )}
         </div>
@@ -203,4 +203,4 @@ const AdminStudentSearch = () => {
   );
 };
 
-export default AdminStudentSearch;
+export default AdminTutorSearch;

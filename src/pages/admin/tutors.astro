@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import AdminTutorSearch from '../../components/admin/AdminTutorSearch';
+---
+
+<DashboardLayout title="Administracion de tutores">
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold text-custom-text dark:text-gray-50">Administracion de Tutores</h2>
+      <p class="text-custom-text dark:text-gray-50 mt-2">Busque un tutor para editar su información</p>
+    </div>
+    <AdminTutorSearch client:load />
+  </div>
+</DashboardLayout>

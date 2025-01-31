@@ -27,6 +27,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect('/auth');
   }
 
+  if (pathname === '/register-attendance' && authData.accesslevel !== 3) {
+    return context.redirect('/');
+  }
+
+  if (pathname.startsWith('/admin') && authData.state.accessLevel !== 1) {
+    return context.redirect('/');
+  }
+
   // Continue to requested route
   return next();
 });

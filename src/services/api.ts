@@ -19,52 +19,7 @@ export const login = async (username: string, password: string) => {
   }
 };
 
-export const getCoursesByPreceptor = async (preceptorId: number, token: string) => {
-  try {
-    const response = await api.get(`/cursos/preceptor/${preceptorId}`,{
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export const closeAttendance = async (courseId: number, token: string) => {
-  try {
-    const response = await api.post(`/asistencia/cerrar/${courseId}`, null, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export const getAttendanceByDayAndCourse = async (courseId: number, date: string, token: string) => {
-  try {
-    const response = await api.post(
-      '/asistencias/revision/',
-      {
-        course_id: courseId,
-        date_to_search: date
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    throw error;
-  }
-}
-
+// Student services
 export const getAllStudents = async (token: string) => {
   try {
     const response = await api.get('/alumnos', {
@@ -104,6 +59,73 @@ export const getStudentById = async (studentId: number, token: string) => {
   }
 }
 
+export const deleteStudent = async (studentId: number, token: string) => {
+  try {
+    const response = await api.delete(`/alumnos/${studentId}`, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Tutors Services
+export const getAllTutors = async (token: string) => {
+  try {
+    const response = await api.get('/tutores', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTutorById = async (tutorId: number, token: string) => {
+  try {
+    const response = await api.get(`/tutores/${tutorId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const deleteTutor = async (tutorId: number, token: string) => {
+  try {
+    const response = await api.delete(`/tutores/${tutorId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Course services
+export const getCoursesByPreceptor = async (preceptorId: number, token: string) => {
+  try {
+    const response = await api.get(`/cursos/preceptor/${preceptorId}`,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export const getAllCourses = async (token: string) => {
   try {
     const response = await api.get('/cursos', {
@@ -117,6 +139,41 @@ export const getAllCourses = async (token: string) => {
   }
 };
 
+// Attendance services
+export const closeAttendance = async (courseId: number, token: string) => {
+  try {
+    const response = await api.post(`/asistencia/cerrar/${courseId}`, null, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const getAttendanceByDayAndCourse = async (courseId: number, date: string, token: string) => {
+  try {
+    const response = await api.post(
+      '/asistencias/revision/',
+      {
+        course_id: courseId,
+        date_to_search: date
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// User Services
 export const getUserDataById = async (token: string, userId: number) => {
   try {
     const response = await api.get(`/usuarios/${userId}`,{

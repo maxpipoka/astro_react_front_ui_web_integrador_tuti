@@ -1,0 +1,15 @@
+.dni-column {
+    min-width: 120px;
+  }
+  
+  .apellidos-column {
+    min-width: 200px;
+  }
+  
+  .nombres-column {
+    min-width: 200px;
+  }
+  
+  .acciones-column {
+    min-width: 100px;
+  }
