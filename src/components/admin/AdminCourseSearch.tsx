@@ -56,7 +56,7 @@ const AdminCoursesSearch = () => {
         setFilteredCourses(response.data);
         setLoading(false);
       } catch (err: any) {
-        setError(err.response?.data?.message || 'Error al obtener la lista de tutores');
+        setError(err.response?.data?.message || 'Error al obtener la lista de cursos');
         setLoading(false);
       }
     };
@@ -66,7 +66,7 @@ const AdminCoursesSearch = () => {
 
   useEffect(() => {
     const filtered = courses.filter(course =>
-    //   course.level.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.level.toString().includes(searchTerm.toLowerCase()) ||
       course.division.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.year.toString().includes(searchTerm)
     );
@@ -90,7 +90,7 @@ const AdminCoursesSearch = () => {
     }
   };
 
-  const handleNewStudent = () => {
+  const handleNewCourse= () => {
     window.location.href = '/admin/course-new';
   };
 
@@ -100,7 +100,7 @@ const AdminCoursesSearch = () => {
         <div className="mb-6 flex flex-col md:flex-row gap-4">
           <input
             type="text"
-            placeholder="Buscar por nombre, apellido o DNI..."
+            placeholder="Buscar por Nivel, Division o Año..."
             className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-custom-accent focus:border-transparent bg-white dark:bg-gray-700 text-custom-text dark:text-white"
             disabled
           />
@@ -108,7 +108,7 @@ const AdminCoursesSearch = () => {
             disabled
             className="bg-custom-accent text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 opacity-50"
           >
-            <FaPlus /> Nuevo Tutor
+            <FaPlus /> Nuevo Curso
           </button>
         </div>
         <div className="space-y-4">
@@ -145,14 +145,14 @@ const AdminCoursesSearch = () => {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar por nombre, apellido o DNI..."
+          placeholder="Buscar por Nivel, División o Año..."
           className="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-custom-accent focus:border-transparent bg-white dark:bg-gray-700 text-custom-text dark:text-white"
         />
         <button
-          onClick={handleNewStudent}
+          onClick={handleNewCourse}
           className="bg-custom-accent text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
         >
-          <FaPlus /> Nuevo Tutor
+          <FaPlus /> Nuevo Curso
         </button>
       </div>
 
@@ -163,47 +163,52 @@ const AdminCoursesSearch = () => {
               No se encontraron cursos
             </p>
           ) : (
-            displayedCourses.map((course, index) => (
-              <div
-                key={course.id}
-                ref={displayedCourses.length === index + 1 ? lastCourseElementRef : null}
-                
-                className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                  <div className="text-sm">
-                    <span className="block text-gray-500 dark:text-gray-400">Nivel</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{course.level}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="block text-gray-500 dark:text-gray-400">División</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{course.division}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="block text-gray-500 dark:text-gray-400">Año</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{course.year}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="block text-gray-500 dark:text-gray-400">Actual</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{course.current}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="block text-gray-500 dark:text-gray-400">Activo</span>
-                    <span className="font-medium text-custom-text dark:text-gray-50">{course.active}</span>
-                  </div>
-                  <div className="flex justify-start md:justify-center">
-                    <button
-                      onClick={() => handleEditClick(course.id)}
-                      className="bg-custom-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-                    >
-                      Editar
-                    </button>
+            
+            displayedCourses.map((course, index) => {
+            
+              return (
+                <div
+                  key={course.id}
+                  ref={displayedCourses.length === index + 1 ? lastCourseElementRef : null}
+                  className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div className="text-sm">
+                      <span className="block text-gray-500 dark:text-gray-400">Nivel</span>
+                      <span className="font-medium text-custom-text dark:text-gray-50">{course.level}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="block text-gray-500 dark:text-gray-400">División</span>
+                      <span className="font-medium text-custom-text dark:text-gray-50">{course.division}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="block text-gray-500 dark:text-gray-400">Año</span>
+                      <span className="font-medium text-custom-text dark:text-gray-50">{course.year}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="block text-gray-500 dark:text-gray-400">Actual</span>
+                      <span className="font-medium text-custom-text dark:text-gray-50">
+                        {course.current ? 'Sí' : 'No'}
+                      </span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="block text-gray-500 dark:text-gray-400">Activo</span>
+                      <span className={`font-medium ${course.active ? "text-green-600" : "text-red-600"}`}>
+                        {course.active ? "Sí" : "No"}
+                      </span>
+                    </div>
+                    <div className="flex justify-start md:justify-center">
+                      <button
+                        onClick={() => handleEditClick(course.id)}
+                        className="bg-custom-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                      >
+                        Editar
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-            
-          )}
+              );
+            }))}
           {loading && (
             <div className="text-center py-4">
               <p className="text-custom-text dark:text-gray-400">Cargando más cursos...</p>
