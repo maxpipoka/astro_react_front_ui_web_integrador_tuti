@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import AdminAttendanceSearch from '../../components/admin/AdminAttendanceSearch';
+---
+
+<DashboardLayout title="Administracion de asistencias">
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold text-custom-text dark:text-gray-50">Administracion de Asistencias</h2>
+      <p class="text-custom-text dark:text-gray-50 mt-2">Busque un curso para editar su información</p>
+    </div>
+    <AdminAttendanceSearch client:load />
+  </div>
+</DashboardLayout>

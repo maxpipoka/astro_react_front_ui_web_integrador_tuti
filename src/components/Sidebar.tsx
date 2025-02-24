@@ -87,7 +87,6 @@ const Sidebar = () => {
         { label: 'Tutores', icon: FaPersonBreastfeeding , href: '/admin/tutors' },
         { label: 'Cursos', icon: FaChartBar, href: '/admin/courses' },
         { label: 'Asistencias', icon: FaClipboardList, href: '/admin/attendances' },
-        { label: 'Roles', icon: FaUser, href: '/admin/roles' },
         { label: 'Usuarios', icon: FaUserCheck, href: '/admin/users' },
       ]
     }]: []),

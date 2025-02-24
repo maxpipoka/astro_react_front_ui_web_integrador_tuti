@@ -1,0 +1,366 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro'
+
+export function getStaticPaths() {
+  return [
+    { params: { id: undefined } }
+  ];
+}
+
+---
+<DashboardLayout title="Editar Alumno">
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold text-custom-text dark:text-gray-50">Editar Alumno</h2>
+      <p class="text-custom-text dark:text-gray-50 mt-2">Modifique la información del alumno</p>
+    </div>
+
+    <div class="bg-white dark:bg-custom-darkblue rounded-lg shadow-md p-6">
+      <form id="studentForm" class="space-y-6">
+
+        <!-- ID and DNI Fields -->
+        <div class="relative flex flex-col md:flex-row gap-4">
+          <!-- ID Field -->
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              ID
+            </label>
+            <input
+              type="number"
+              id="idStudent"
+              disabled
+              class="w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            />
+          </div>
+          <!-- DNI Field -->
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              DNI
+            </label>
+            <input
+              type="number"
+              id="dni"
+              disabled
+              class="w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            />
+          </div>
+          <!-- ACTIVE Field -->
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              ACTIVO
+            </label>
+            <select id="active" name="active" disabled class="p-1 border rounded-md ">
+              <option value="true">SI</option>
+              <option value="false">NO</option>
+            </select>
+            <button
+              type="button"
+              onclick="toggleEdit('active')"
+              class="edit-btn ml-1 px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onclick="cancelEdit('active')"
+              class="cancel-btn hidden ml-1 px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Cancelar
+            </button>
+          </div>
+          
+        </div>
+
+        <!-- Nombres Field -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Nombres
+          </label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="names"
+              disabled
+              class="flex-1 p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            />
+            <button
+              type="button"
+              onclick="toggleEdit('names')"
+              class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onclick="cancelEdit('names')"
+              class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+
+        <!-- Apellidos Field -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Apellidos
+          </label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="surnames"
+              disabled
+              class="flex-1 p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            />
+            <button
+              type="button"
+              onclick="toggleEdit('surnames')"
+              class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onclick="cancelEdit('surnames')"
+              class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+        
+        <!-- Tutores Field -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Tutores
+          </label>
+          <div id="tutorsList" class="flex flex-col gap-2">
+            <!-- Los tutores se cargarán aquí -->
+          </div>
+        </div>
+
+        <!-- Address Field -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Dirección
+          </label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="address"
+              disabled
+              class="flex-1 p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            />
+            <button
+              type="button"
+              onclick="toggleEdit('address')"
+              class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onclick="cancelEdit('address')"
+              class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Email
+          </label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="email"
+              disabled
+              class="flex-1 p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            />
+            <button
+              type="button"
+              onclick="toggleEdit('email')"
+              class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onclick="cancelEdit('email')"
+              class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="flex justify-end mt-6">
+          <button
+            type="submit"
+            id="saveButton"
+            disabled
+            class="px-6 py-2 bg-green-500 text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  import { getStudentById, updateStudent } from '../../../services/api';
+
+  let originalData = {};
+  let modifiedFields = new Set();
+  const studentId = parseInt(window.location.pathname.split('/').pop());
+
+  // Get auth data from localStorage
+  const getAuthData = () => {
+    try {
+      const authData = localStorage.getItem('sie-auth-storage');
+      if (authData) {
+        return JSON.parse(authData).state;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error parsing auth data:', err);
+      return null;
+    }
+  };
+
+  // Load student data
+  const loadStudentData = async () => {
+    try {
+      const authData = getAuthData();
+      if (!authData?.token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
+      const response = await getStudentById(studentId, authData.token);
+      const student = response.data;
+
+      // Store original data
+      originalData = {
+        id: student.id,
+        dni: student.dni,
+        active: student.active,
+        names: student.names,
+        surnames: student.surnames,
+        tutors: student.tutors,
+        address: student.address,
+        email: student.email,
+
+      };
+
+      // Set values in form
+      (document.getElementById('idStudent') as HTMLInputElement).value = student.id;
+      (document.getElementById('dni') as HTMLInputElement).value = student.dni;
+      (document.getElementById('active') as HTMLSelectElement).value = student.active;
+      (document.getElementById('names') as HTMLInputElement).value = student.names;
+      (document.getElementById('surnames') as HTMLInputElement).value = student.surnames;
+      (document.getElementById('address') as HTMLInputElement).value = student.address;
+      (document.getElementById('email') as HTMLInputElement).value = student.email;
+
+      // Load tutors
+      const tutorsList = document.getElementById('tutorsList');
+      tutorsList.innerHTML = '';
+      student.tutors.forEach(tutor => {
+        const tutorItem = document.createElement('div');
+        tutorItem.className = 'flex items-center gap-2 p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+        tutorItem.innerHTML = `
+          <span>${tutor.dni} - </span>
+          <span>${tutor.names} ${tutor.surnames}</span>
+        `;
+        tutorsList.appendChild(tutorItem);
+      })
+
+    } catch (error) {
+      console.error('Error loading student:', error);
+      alert('Error al cargar los datos del alumno');
+    }
+  };
+
+  // Toggle edit mode for a field
+  window.toggleEdit = (fieldId) => {
+    const input = document.getElementById(fieldId);
+    const editBtn = input.parentElement.querySelector('.edit-btn');
+    const cancelBtn = input.parentElement.querySelector('.cancel-btn');
+
+    input.disabled = !input.disabled;
+    input.classList.toggle('bg-gray-100');
+    input.classList.toggle('bg-white');
+    editBtn.classList.toggle('hidden');
+    cancelBtn.classList.toggle('hidden');
+
+    if (!input.disabled) {
+      input.focus();
+      modifiedFields.add(fieldId);
+    } else {
+      modifiedFields.delete(fieldId);
+    }
+
+    document.getElementById('saveButton').disabled = modifiedFields.size === 0;
+  };
+
+  // Cancel edit for a field
+  window.cancelEdit = (fieldId) => {
+    const input = document.getElementById(fieldId);
+    const editBtn = input.parentElement.querySelector('.edit-btn');
+    const cancelBtn = input.parentElement.querySelector('.cancel-btn');
+
+    input.value = originalData[fieldId];
+    input.disabled = true;
+    input.classList.add('bg-gray-100');
+    input.classList.remove('bg-white');
+    editBtn.classList.remove('hidden');
+    cancelBtn.classList.add('hidden');
+
+    modifiedFields.delete(fieldId);
+    document.getElementById('saveButton').disabled = modifiedFields.size === 0;
+  };
+
+  // Handle form submission
+  document.getElementById('studentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+      const authData = getAuthData();
+      if (!authData?.token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
+      // Catch all modified fields in a object
+      const updatedData = {};
+      for (const field of modifiedFields) {
+        const input = document.getElementById(field) as HTMLInputElement | HTMLSelectElement;
+        if (input) {
+          if (field === 'dni') { 
+          updatedData[field] = parseInt(input.value);
+          } else if (field === 'active') {
+            updatedData[field] = input.value === 'true';
+          } else {
+            updatedData[field] = input.value;
+          }
+        }
+      }
+
+      console.log(updatedData);
+      await updateStudent(studentId, updatedData, authData.token);
+
+      alert('Datos actualizados correctamente');
+      window.location.href = '/admin/students';
+    } catch (error) {
+      console.error('Error updating student:', error);
+      alert('Error al actualizar los datos del alumno');
+    }
+  });
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', loadStudentData);
+</script>

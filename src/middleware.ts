@@ -27,7 +27,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect('/auth');
   }
 
-  if (pathname === '/register-attendance' && authData.accesslevel !== 3) {
+  const accessLevel = parseInt(authData.state.accessLevel)
+
+  if (pathname === '/register-attendance' && accessLevel !== 3) {
     return context.redirect('/');
   }
 

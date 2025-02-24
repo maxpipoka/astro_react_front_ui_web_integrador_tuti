@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import AdminUsersSearch from '../../components/admin/AdminUsersSearch';
+---
+
+<DashboardLayout title="Administracion de usuarios">
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold text-custom-text dark:text-gray-50">Administracion de Usuarios</h2>
+      <p class="text-custom-text dark:text-gray-50 mt-2">Busque un usuario para modificar su información</p>
+    </div>
+    <AdminUsersSearch client:load />
+  </div>
+</DashboardLayout>

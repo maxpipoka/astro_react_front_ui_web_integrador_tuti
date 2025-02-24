@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { getAllStudents } from '../services/api';
+import { getStudents } from '../services/api';
 import { format } from 'date-fns';
 
 interface Student {
@@ -51,7 +51,7 @@ const StudentSearch = () => {
       }
 
       try {
-        const response = await getAllStudents(token);
+        const response = await getStudents(token);
         setStudents(response.data);
         setFilteredStudents(response.data);
         setLoading(false);
@@ -142,6 +142,7 @@ const StudentSearch = () => {
           placeholder="Buscar por nombre, apellido o DNI..."
           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-custom-accent focus:border-transparent bg-white dark:bg-gray-700 text-custom-text dark:text-white"
         />
+      <p className="text-red-700 dark:text-red-700 mt-2">* Solo se mostrarán alumnos con el estado de ACTIVO</p>
       </div>
 
       <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">

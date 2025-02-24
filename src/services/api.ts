@@ -20,7 +20,7 @@ export const login = async (username: string, password: string) => {
 };
 
 // Student services
-export const getAllStudents = async (token: string) => {
+export const getStudents = async (token: string) => {
   try {
     const response = await api.get('/alumnos', {
       headers: {
@@ -32,6 +32,19 @@ export const getAllStudents = async (token: string) => {
     throw error;
   }
 };
+
+export const getAllStudents = async (token: string) => {
+  try {
+    const response = await api.get('/alumnos/todos', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
 
 export const getStudentReport = async (studentId: number, startDate: string, endDate: string, token: string) => {
   try {
@@ -53,6 +66,23 @@ export const getStudentById = async (studentId: number, token: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const updateStudent = async (studentId: number, data: Record<string, any>, token: string) => {
+  try {
+    const response = await api.patch(`/alumnos/${studentId}`, 
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log(response);
     return response;
   } catch (error) {
     throw error;
@@ -198,6 +228,22 @@ export const updateUserData = async (token: string, userId: number, field: strin
       }
     })
     return response
+  } catch (error){
+    throw error;
+  }
+}
+
+export const getAllUsers= async (token: string) => {
+  try {
+    const response = await api.get(`/usuarios`,
+      {
+        headers: {
+          Authorization:`Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      }
+     )
+     return response
   } catch (error){
     throw error;
   }
