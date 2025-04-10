@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'https://flask-api-rest-integrador-tuti.vercel.app/';
+// const API_URL = 'https://flask-api-rest-integrador-tuti.vercel.app/';
+const API_URL = 'http://127.0.0.1:5000';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -71,6 +72,29 @@ export const getStudentById = async (studentId: number, token: string) => {
     throw error;
   }
 }
+
+export const saveStudent = async (student: any, token: string) => {
+  console.log(token)
+  try {
+    const response = await api.post(`/alumnos`, student, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+
+  // const config = {
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'Authorization': `Bearer ${token}`,
+  //     'Access-Control-Allow-Origin': '*'
+  //   }
+  // };
+  // return await axios.post(`/alumnos/`, student, config);
+};
 
 export const updateStudent = async (studentId: number, data: Record<string, any>, token: string) => {
   try {
