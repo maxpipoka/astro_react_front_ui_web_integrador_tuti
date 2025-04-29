@@ -1,11 +1,11 @@
 ---
 import DashboardLayout from '../../../layouts/DashboardLayout.astro'
 
-export function getStaticPaths() {
-  return [
-    { params: { id: undefined } }
-  ];
-}
+//export function getStaticPaths() {
+//  return [
+//    { params: { id: undefined } }
+//  ];
+//}
 
 ---
 <DashboardLayout title="Editar Tutor">
@@ -55,14 +55,12 @@ export function getStaticPaths() {
             </select>
             <button
               type="button"
-              onclick="toggleEdit('active')"
               class="edit-btn ml-1 px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Editar
             </button>
             <button
               type="button"
-              onclick="cancelEdit('active')"
               class="cancel-btn hidden ml-1 px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Cancelar
@@ -85,14 +83,12 @@ export function getStaticPaths() {
             />
             <button
               type="button"
-              onclick="toggleEdit('names')"
               class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Editar
             </button>
             <button
               type="button"
-              onclick="cancelEdit('names')"
               class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Cancelar
@@ -114,14 +110,12 @@ export function getStaticPaths() {
             />
             <button
               type="button"
-              onclick="toggleEdit('surnames')"
               class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Editar
             </button>
             <button
               type="button"
-              onclick="cancelEdit('surnames')"
               class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Cancelar
@@ -132,9 +126,9 @@ export function getStaticPaths() {
         <!-- Alumnos Field -->
         <div class="relative">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Alumnas a cargo
+            Alumnas/os a cargo
           </label>
-          <div id="tutorsList" class="flex flex-col gap-2">
+          <div id="studentsList" class="flex flex-col gap-2">
             <!-- Los Alumnos se cargarán aquí -->
           </div>
         </div>
@@ -153,14 +147,12 @@ export function getStaticPaths() {
             />
             <button
               type="button"
-              onclick="toggleEdit('address')"
               class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Editar
             </button>
             <button
               type="button"
-              onclick="cancelEdit('address')"
               class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Cancelar
@@ -182,14 +174,12 @@ export function getStaticPaths() {
             />
             <button
               type="button"
-              onclick="toggleEdit('email')"
               class="edit-btn px-4 py-2 bg-custom-accent text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Editar
             </button>
             <button
               type="button"
-              onclick="cancelEdit('email')"
               class="cancel-btn hidden px-4 py-2 bg-red-500 text-white rounded-md hover:opacity-90 transition-opacity"
             >
               Cancelar
@@ -216,8 +206,19 @@ export function getStaticPaths() {
 <script>
   import { getTutorById, updateTutor } from '../../../services/api';
 
-  let originalData = {};
-  let modifiedFields = new Set();
+  interface Tutor {
+    id: number;
+    dni: number;
+    active: boolean;
+    names: string;
+    surnames: string;
+    students: { dni: string; names: string; surnames: string}[];
+    address: string;
+    email: string;
+  }
+
+  let originalData: Tutor;
+  let modifiedFields = new Set<keyof Tutor>();
   const tutorId = parseInt(window.location.pathname.split('/').pop());
 
   // Get auth data from localStorage
@@ -243,7 +244,7 @@ export function getStaticPaths() {
       }
 
       const response = await getTutorById(tutorId, authData.token);
-      const tutor = response.data;
+      const tutor: Tutor = response.data;
 
       // Store original data
       originalData = {
@@ -252,33 +253,35 @@ export function getStaticPaths() {
         active: tutor.active,
         names: tutor.names,
         surnames: tutor.surnames,
-        tutors: tutor.students,
+        students: tutor.students,
         address: tutor.address,
         email: tutor.email,
-
       };
 
       // Set values in form
-      (document.getElementById('idTutor') as HTMLInputElement).value = tutor.id;
-      (document.getElementById('dni') as HTMLInputElement).value = tutor.dni;
-      (document.getElementById('active') as HTMLSelectElement).value = tutor.active;
+      (document.getElementById('idTutor') as HTMLInputElement).value = String(tutor.id);
+      (document.getElementById('dni') as HTMLInputElement).value = String(tutor.dni);
+      (document.getElementById('active') as HTMLSelectElement).value = String(tutor.active);
       (document.getElementById('names') as HTMLInputElement).value = tutor.names;
       (document.getElementById('surnames') as HTMLInputElement).value = tutor.surnames;
       (document.getElementById('address') as HTMLInputElement).value = tutor.address;
       (document.getElementById('email') as HTMLInputElement).value = tutor.email;
 
       // Load students
-      const studentsList = document.getElementById('tutorsList');
+      const studentsList = document.getElementById('studentsList');
       studentsList.innerHTML = '';
-      tutor.students.forEach(student => {
-        const studentItem = document.createElement('div');
-        studentItem.className = 'flex items-center gap-2 p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
-        studentItem.innerHTML = `
-          <span>${tutor.dni} - </span>
-          <span>${tutor.names} ${tutor.surnames}</span>
-        `;
-        studentsList.appendChild(studentItem);
-      })
+      
+      if (tutor.students && tutor.students.length !== 0) {
+        tutor.students.forEach(student => {
+          const studentItem = document.createElement('div');
+          studentItem.className = 'flex items-center gap-2 p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+          studentItem.innerHTML = `
+            <span>${student.dni} - </span>
+            <span>${student.names} ${student.surnames}</span>
+          `;
+          studentsList.appendChild(studentItem);
+        })
+      }
 
     } catch (error) {
       console.error('Error loading tutor:', error);
@@ -286,12 +289,25 @@ export function getStaticPaths() {
     }
   };
 
+  document.querySelectorAll('.edit-btn').forEach(button => {
+    const field = button.parentElement.querySelector('input, select').id;
+    button.addEventListener('click', () => toggleEdit(field));
+  });
+
+  document.querySelectorAll('.cancel-btn').forEach(button => {
+    const field = button.parentElement.querySelector('input, select').id; // Get the associated field ID
+    button.addEventListener('click', () => cancelEdit(field));
+  });
+
+
+
   // Toggle edit mode for a field
-  window.toggleEdit = (fieldId) => {
-    const input = document.getElementById(fieldId);
+  const toggleEdit = (fieldId: keyof Tutor) => {
+    const input = document.getElementById(fieldId) as HTMLInputElement;
     const editBtn = input.parentElement.querySelector('.edit-btn');
     const cancelBtn = input.parentElement.querySelector('.cancel-btn');
-
+    const saveButton = document.getElementById('saveButton') as HTMLInputElement;
+    
     input.disabled = !input.disabled;
     input.classList.toggle('bg-gray-100');
     input.classList.toggle('bg-white');
@@ -305,16 +321,17 @@ export function getStaticPaths() {
       modifiedFields.delete(fieldId);
     }
 
-    document.getElementById('saveButton').disabled = modifiedFields.size === 0;
+    saveButton.disabled = modifiedFields.size === 0;
   };
 
   // Cancel edit for a field
-  window.cancelEdit = (fieldId) => {
-    const input = document.getElementById(fieldId);
+  const cancelEdit = (fieldId: keyof Tutor) => {
+    const input = document.getElementById(fieldId) as HTMLInputElement;
     const editBtn = input.parentElement.querySelector('.edit-btn');
     const cancelBtn = input.parentElement.querySelector('.cancel-btn');
+    const saveButton = document.getElementById('saveButton') as HTMLInputElement;
 
-    input.value = originalData[fieldId];
+    input.value = String(originalData[fieldId]);
     input.disabled = true;
     input.classList.add('bg-gray-100');
     input.classList.remove('bg-white');
@@ -322,7 +339,7 @@ export function getStaticPaths() {
     cancelBtn.classList.add('hidden');
 
     modifiedFields.delete(fieldId);
-    document.getElementById('saveButton').disabled = modifiedFields.size === 0;
+    saveButton.disabled = modifiedFields.size === 0;
   };
 
   // Handle form submission
@@ -336,31 +353,45 @@ export function getStaticPaths() {
       }
 
       // Catch all modified fields in a object
-      const updatedData = {};
+      const updatedData: Partial<Tutor> = {};
       for (const field of modifiedFields) {
         const input = document.getElementById(field) as HTMLInputElement | HTMLSelectElement;
+        
         if (input) {
           if (field === 'dni') { 
-          updatedData[field] = parseInt(input.value);
-          } else if (field === 'active') {
+            const dniValue = parseInt(input.value);
+            if (isNaN(dniValue)){
+              alert('El DNI debe ser un número válido');
+              return;
+            }
+          updatedData[field] = dniValue;
+          continue;
+          } 
+          if (field === 'active') {
             updatedData[field] = input.value === 'true';
-          } else {
-            updatedData[field] = input.value;
+            continue;
+          } 
+          if (field === 'email'){
+            if (!input.value.includes('@')) {
+              alert('Email debe tener un formato válido');
+              return;
+            }
           }
+          updatedData[field] = input.value;
         }
       }
 
-      console.log(updatedData);
-      await updateStudent(studentId, updatedData, authData.token);
+      console.log('UpdatedData: ', + updatedData);
+      await updateTutor(tutorId, updatedData, authData.token);
 
       alert('Datos actualizados correctamente');
-      window.location.href = '/admin/students';
+      window.location.href = '/admin/tutors';
     } catch (error) {
-      console.error('Error updating student:', error);
-      alert('Error al actualizar los datos del alumno');
+      console.error('Error updating tutor:', error);
+      alert('Error al actualizar los datos del tutor');
     }
   });
 
   // Initialize
-  document.addEventListener('DOMContentLoaded', loadStudentData);
+  document.addEventListener('DOMContentLoaded', loadTutorData);
 </script>

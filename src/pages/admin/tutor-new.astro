@@ -2,21 +2,21 @@
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 ---
 
-<DashboardLayout title="Creación de Nuevo Estudiante">
+<DashboardLayout title="Creación de Nuevo Tutor">
   <div class="space-y-6">
     <div>
       <h2 class="text-2xl font-bold text-custom-text dark:text-gray-50">Creación de Nuevo Tutor</h2>
       <p class="text-custom-text dark:text-gray-50 mt-2">Ingrese la información solicitada ( '*' OBLIGATORIA)</p>
     </div>
     <div class="bg-white dark:bg-custom-darkblue rounded-lg shadow-md p-6">
-        <form id="newStudentForm" class="space-y-6">
+        <form id="newTutorForm" class="space-y-6">
             <div class="relative">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     DNI (*)
                 </label>
                 <input 
                 type="number"
-                id="studentDNI"
+                id="tutorDNI"
                 autocomplete="off"
                 pattern="\d{8,}"
                 class="w-32 max-sm:w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
@@ -29,7 +29,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
                 </label>
                 <input 
                 type="text"
-                id="studentNames"
+                id="tutorNames"
                 autocomplete="off"
                 class="w-1/2 max-sm:w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                 required >
@@ -40,7 +40,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
                 </label>
                 <input 
                 type="text"
-                id="studentLastName"
+                id="tutorLastName"
                 autocomplete="off"
                 class="w-1/2 max-sm:w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                 required >
@@ -51,7 +51,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
                 </label>
                 <input 
                 type="text"
-                id="studentAddress"
+                id="tutorAddress"
                 autocomplete="off"
                 class="w-1/2 max-sm:w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                 required >
@@ -62,7 +62,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
                 </label>
                 <input 
                 type="email"
-                id="studentEmail"
+                id="tutorEmail"
                 autocomplete="off"
                 class="w-1/2 max-sm:w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                 required >
@@ -74,7 +74,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
                 id="saveButton"
                 disabled
                 class="px-6 py-2 bg-green-500 text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-                    Guardar Alumno
+                    Guardar Tutor
                 </button>
                 <button
                 type="button"
@@ -89,7 +89,7 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
     <!-- <AdminUsersSearch client:load /> -->
   </div>
 <script>
-  import { saveStudent } from '../../services/api.ts';
+  import { saveTutor } from '../../services/api.ts';
   let authData;
 
   const getAuthData = () => {
@@ -115,15 +115,15 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
   }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('newStudentForm') as HTMLFormElement;
+      const form = document.getElementById('newTutorForm') as HTMLFormElement;
       const saveButton = document.getElementById('saveButton') as HTMLButtonElement;
       const cancelButton = document.getElementById('cancelButton') as HTMLButtonElement;
       const inputs = form.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
-      const dniInput = document.getElementById('studentDNI') as HTMLInputElement;
-      const studentNames = document.getElementById('studentNames') as HTMLInputElement;
-      const studentLastName = document.getElementById('studentLastName') as HTMLInputElement;
-      const studentAddress = document.getElementById('studentAddress') as HTMLInputElement;
-      const studentEmail = document.getElementById('studentEmail') as HTMLInputElement;
+      const dniInput = document.getElementById('tutorDNI') as HTMLInputElement;
+      const tutorNames = document.getElementById('tutorNames') as HTMLInputElement;
+      const tutorLastName = document.getElementById('tutorLastName') as HTMLInputElement;
+      const tutorAddress = document.getElementById('tutorAddress') as HTMLInputElement;
+      const tutorEmail = document.getElementById('tutorEmail') as HTMLInputElement;
       const dniError = document.getElementById('dniError') as HTMLElement;
 
       const checkFormValidity = () => {
@@ -147,36 +147,37 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro';
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         // Aquí puedes agregar la lógica para enviar el formulario
-        const student = {
+        const tutor = {
           dni: dniInput.value,
-          names: studentNames.value,
-          surnames: studentLastName.value,
-          address: studentAddress.value,
-          email: studentEmail.value,
+          names: tutorNames.value,
+          surnames: tutorLastName.value,
+          address: tutorAddress.value,
+          email: tutorEmail.value,
         };
-        const saveStudentProccess = async (student, token) => {
+
+        const saveTutorProccess = async (tutor, token) => {
           try {
-            const res = await saveStudent(student, token);
+            const res = await saveTutor(tutor, token);
             if (res.status === 201 || res.status === 200) {
-              alert('Estudiante guardado exitosamente');
+              alert('Tutor guardado exitosamente');
               form.reset();
-              window.location.href = '/admin/students';
+              window.location.href = '/admin/tutors';
             } else {
-              throw new Error('Error al guardar estudiante');
+              throw new Error('Error al guardar tutor');
             }
           } catch (error) {
             console.error('Error details:', error);
 
             if (!(error.response?.data?.message === 'DNI ya existente en la base de datos')){
-              alert('Error al guardar el estudiante. Intente nuevamente mas tarde.')}
+              alert('Error al guardar el tutor. Intente nuevamente mas tarde.')}
 
             if ((error.response?.data?.message === 'DNI ya existente en la base de datos')){
-              alert('Error al guardar el estudiante. DNI ya existente en la base de datos')}
+              alert('Error al guardar el tutor. DNI ya existente en la base de datos')}
 
           }
         };
         
-        saveStudentProccess(student, authData?.token);
+        saveTutorProccess(tutor, authData?.token);
 
       });
 

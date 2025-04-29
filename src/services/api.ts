@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const API_URL = 'https://flask-api-rest-integrador-tuti.vercel.app/';
-const API_URL = 'http://127.0.0.1:5000';
+const API_URL = 'https://flask-api-rest-integrador-tuti.vercel.app/';
+// const API_URL = 'http://127.0.0.1:5000';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -74,7 +74,6 @@ export const getStudentById = async (studentId: number, token: string) => {
 }
 
 export const saveStudent = async (student: any, token: string) => {
-  console.log(token)
   try {
     const response = await api.post(`/alumnos`, student, {
       headers: {
@@ -147,6 +146,39 @@ export const getTutorById = async (tutorId: number, token: string) => {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log('Response Data GetTutorById: ', response.data)
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const saveTutor = async (tutor: any, token: string) => {
+try {
+  const response = await api.post(`/tutores`,
+  tutor,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response;
+} catch (error) {
+  throw error;
+}
+};
+
+export const updateTutor = async (tutorId: number, data: Record<string, any>, token: string) => {
+  try {
+    const response = await api.patch(`/tutores/${tutorId}`, 
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log(response);
     return response;
   } catch (error) {
     throw error;
